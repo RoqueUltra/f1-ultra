@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>F1 Ultra - Live Timing</title>
+    <title>F1 Ultra - Temporada 2026</title>
     <link href="https://fonts.googleapis.com/css2?family=Titillium+Web:wght@300;400;600;700;900&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -14,18 +14,9 @@
             --text-primary: #ffffff;
             --text-secondary: #a0a0b0;
             --border-color: #2a2a3e;
-            --sector-purple: #ff00ff;
-            --sector-green: #00ff00;
-            --sector-yellow: #ffff00;
-            --purple-bg: rgba(255, 0, 255, 0.2);
-            --green-bg: rgba(0, 255, 0, 0.2);
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             font-family: 'Titillium Web', sans-serif;
@@ -37,33 +28,51 @@
         /* HEADER */
         .top-header {
             background: linear-gradient(135deg, var(--f1-red) 0%, #9e0000 100%);
-            padding: 10px 30px;
+            padding: 15px 30px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
             box-shadow: 0 4px 20px rgba(225, 6, 0, 0.4);
         }
 
         .logo {
-            font-size: 2rem;
+            font-size: 2.2rem;
             font-weight: 900;
             font-style: italic;
             letter-spacing: 2px;
         }
 
-        .session-header {
-            text-align: center;
+        .session-selector {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
         }
 
-        .session-name {
-            font-size: 1.4rem;
+        .session-selector label {
             font-weight: 700;
-            text-transform: uppercase;
+            font-size: 0.9rem;
         }
 
-        .session-circuit {
-            font-size: 0.95rem;
-            opacity: 0.9;
+        .session-selector select {
+            padding: 10px 15px;
+            background: var(--dark-bg);
+            color: white;
+            border: 2px solid white;
+            border-radius: 4px;
+            font-family: inherit;
+            font-size: 0.9rem;
+            cursor: pointer;
+            max-width: 350px;
+            font-weight: 600;
+        }
+
+        .session-selector select:focus {
+            outline: none;
+            border-color: var(--f1-red);
+            box-shadow: 0 0 10px rgba(255,255,255,0.5);
         }
 
         .live-indicator {
@@ -86,6 +95,44 @@
             animation: pulse 1.5s infinite;
         }
 
+        /* SESSION INFO BAR */
+        .session-info-bar {
+            background: var(--card-bg);
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--f1-red);
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .session-details {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .circuit-name {
+            font-size: 1.3rem;
+            font-weight: 700;
+        }
+
+        .session-meta {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .session-type {
+            background: var(--f1-red);
+            padding: 6px 20px;
+            border-radius: 4px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+        }
+
         /* WEATHER BAR */
         .weather-bar {
             background: var(--header-bg);
@@ -101,36 +148,22 @@
             display: flex;
             align-items: center;
             gap: 10px;
-            font-size: 0.9rem;
         }
 
-        .weather-icon {
-            font-size: 1.3rem;
-        }
-
-        .weather-label {
-            color: var(--text-secondary);
-            font-size: 0.75rem;
-            text-transform: uppercase;
-        }
-
-        .weather-value {
-            font-weight: 700;
-            min-width: 60px;
-        }
+        .weather-icon { font-size: 1.5rem; }
+        .weather-label { color: var(--text-secondary); font-size: 0.75rem; text-transform: uppercase; }
+        .weather-value { font-weight: 700; min-width: 60px; font-size: 1rem; }
 
         /* MAIN LAYOUT */
         .main-layout {
             display: grid;
             grid-template-columns: 1fr 400px;
             gap: 0;
-            min-height: calc(100vh - 140px);
+            min-height: calc(100vh - 200px);
         }
 
         @media (max-width: 1200px) {
-            .main-layout {
-                grid-template-columns: 1fr;
-            }
+            .main-layout { grid-template-columns: 1fr; }
         }
 
         /* TIMING TABLE */
@@ -142,7 +175,6 @@
         .timing-table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 0.9rem;
         }
 
         .timing-table thead {
@@ -168,10 +200,6 @@
             border-bottom: 1px solid var(--border-color);
         }
 
-        .timing-table tr {
-            transition: background 0.2s;
-        }
-
         .timing-table tr:hover {
             background: rgba(225, 6, 0, 0.15);
         }
@@ -188,18 +216,13 @@
             display: flex;
             align-items: center;
             gap: 12px;
-            min-width: 200px;
+            min-width: 220px;
         }
 
         .team-line {
             width: 4px;
             height: 35px;
             border-radius: 2px;
-        }
-
-        .driver-details {
-            display: flex;
-            flex-direction: column;
         }
 
         .driver-number {
@@ -221,40 +244,21 @@
         .laps-col {
             text-align: center;
             font-weight: 600;
-            width: 60px;
+            width: 70px;
         }
 
-        .gap-col {
-            font-family: 'Courier New', monospace;
-            font-weight: 700;
-            width: 120px;
-        }
-
-        .gap-leader {
-            color: var(--text-secondary);
-        }
-
-        .gap-positive {
-            color: #4cd964;
-        }
-
-        .interval-col {
-            font-family: 'Courier New', monospace;
-            font-weight: 700;
-            width: 100px;
-            color: var(--text-secondary);
-        }
+        .gap-positive { color: #4cd964; font-family: monospace; font-weight: 700; }
+        .gap-leader { color: var(--text-secondary); font-family: monospace; }
 
         .best-lap {
-            font-family: 'Courier New', monospace;
+            font-family: monospace;
             font-weight: 700;
-            width: 100px;
         }
 
         .sectors-display {
             display: flex;
             gap: 6px;
-            font-family: 'Courier New', monospace;
+            font-family: monospace;
             font-size: 0.85rem;
         }
 
@@ -266,51 +270,24 @@
             text-align: center;
         }
 
-        .sector-pb {
-            color: var(--sector-purple);
-            font-weight: 700;
-            background: var(--purple-bg);
-        }
-
-        .sector-personal {
-            color: var(--sector-green);
-            background: var(--green-bg);
-        }
+        .sector-pb { color: #ff00ff; background: rgba(255, 0, 255, 0.2); font-weight: 700; }
+        .sector-personal { color: #00ff00; background: rgba(0, 255, 0, 0.2); }
 
         .tire-compound {
             display: inline-block;
-            padding: 3px 8px;
-            border-radius: 3px;
-            font-size: 0.75rem;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 0.8rem;
             font-weight: 700;
+            min-width: 45px;
             text-align: center;
-            min-width: 40px;
         }
 
-        .tire-soft {
-            background: #da291c;
-            color: white;
-        }
-
-        .tire-medium {
-            background: #ffd700;
-            color: black;
-        }
-
-        .tire-hard {
-            background: #ffffff;
-            color: black;
-        }
-
-        .tire-inter {
-            background: #00ff87;
-            color: black;
-        }
-
-        .tire-wet {
-            background: #0093d0;
-            color: white;
-        }
+        .tire-soft { background: #da291c; color: white; }
+        .tire-medium { background: #ffd700; color: black; }
+        .tire-hard { background: #ffffff; color: black; }
+        .tire-inter { background: #00ff87; color: black; }
+        .tire-wet { background: #0093d0; color: white; }
 
         /* SIDEBAR */
         .sidebar {
@@ -318,7 +295,6 @@
             border-left: 2px solid var(--border-color);
             display: flex;
             flex-direction: column;
-            overflow: hidden;
         }
 
         .sidebar-section {
@@ -330,19 +306,16 @@
             padding: 12px 20px;
             font-weight: 700;
             text-transform: uppercase;
-            font-size: 0.9rem;
+            font-size: 0.95rem;
             border-bottom: 2px solid var(--f1-red);
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .sidebar-content {
             padding: 15px;
-            max-height: 300px;
-            overflow-y: auto;
-        }
-
-        /* RACE CONTROL */
-        .race-control-list {
-            max-height: 250px;
+            max-height: 350px;
             overflow-y: auto;
         }
 
@@ -355,31 +328,18 @@
             font-size: 0.85rem;
         }
 
-        .rc-lap {
-            font-weight: 700;
-            color: var(--f1-red);
-            margin-right: 8px;
-        }
-
-        .rc-time {
-            font-size: 0.75rem;
-            color: var(--text-secondary);
-            float: right;
-        }
+        .rc-lap { font-weight: 700; color: var(--f1-red); margin-right: 8px; }
+        .rc-time { font-size: 0.75rem; color: var(--text-secondary); float: right; }
 
         /* CHAT */
-        .chat-section {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            min-height: 400px;
-        }
+        .chat-section { flex: 1; display: flex; flex-direction: column; }
 
         .chat-messages {
             flex: 1;
             overflow-y: auto;
             padding: 15px;
             background: rgba(0,0,0,0.2);
+            min-height: 300px;
             max-height: 400px;
         }
 
@@ -397,22 +357,9 @@
             margin-bottom: 5px;
         }
 
-        .chat-username {
-            font-weight: 700;
-            color: var(--f1-red);
-            font-size: 0.85rem;
-        }
-
-        .chat-timestamp {
-            font-size: 0.75rem;
-            color: var(--text-secondary);
-        }
-
-        .chat-message {
-            font-size: 0.9rem;
-            line-height: 1.4;
-            word-wrap: break-word;
-        }
+        .chat-username { font-weight: 700; color: var(--f1-red); font-size: 0.85rem; }
+        .chat-timestamp { font-size: 0.75rem; color: var(--text-secondary); }
+        .chat-message { font-size: 0.9rem; line-height: 1.4; word-wrap: break-word; }
 
         .chat-input-area {
             padding: 15px;
@@ -429,13 +376,9 @@
             color: white;
             border-radius: 4px;
             font-family: inherit;
-            font-size: 0.9rem;
         }
 
-        .chat-input:focus {
-            outline: none;
-            border-color: var(--f1-red);
-        }
+        .chat-input:focus { outline: none; border-color: var(--f1-red); }
 
         .chat-send {
             padding: 10px 20px;
@@ -446,31 +389,11 @@
             font-weight: 700;
             cursor: pointer;
             text-transform: uppercase;
-            font-size: 0.85rem;
         }
 
-        .chat-send:hover {
-            background: #ff1a1a;
-        }
+        .chat-send:hover { background: #ff1a1a; }
 
-        /* ANIMATIONS */
-        @keyframes pulse {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.5; transform: scale(0.95); }
-        }
-
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        /* LOADING */
+        /* LOADING & EMPTY STATES */
         .loading-state {
             text-align: center;
             padding: 40px;
@@ -492,24 +415,21 @@
             100% { transform: rotate(360deg); }
         }
 
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(0.95); }
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
         /* SCROLLBAR */
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: var(--dark-bg);
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: var(--f1-red);
-            border-radius: 4px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: #ff1a1a;
-        }
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: var(--dark-bg); }
+        ::-webkit-scrollbar-thumb { background: var(--f1-red); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #ff1a1a; }
 
         .last-update {
             position: fixed;
@@ -528,14 +448,27 @@
     <!-- TOP HEADER -->
     <div class="top-header">
         <div class="logo">F1 ULTRA</div>
-        <div class="session-header">
-            <div class="session-name" id="session-name">Cargando sesión...</div>
-            <div class="session-circuit" id="circuit-name">Circuito</div>
+        
+        <div class="session-selector">
+            <label for="gp-select">🏁 Temporada 2026:</label>
+            <select id="gp-select" onchange="loadSelectedSession()">
+                <option value="">Cargando carreras...</option>
+            </select>
         </div>
+
         <div class="live-indicator">
             <div class="live-dot"></div>
-            <span>EN VIVO</span>
+            <span id="live-status">2026</span>
         </div>
+    </div>
+
+    <!-- SESSION INFO -->
+    <div class="session-info-bar">
+        <div class="session-details">
+            <div class="circuit-name" id="circuit-name">Selecciona una carrera</div>
+            <div class="session-meta" id="session-date">--</div>
+        </div>
+        <div class="session-type" id="session-type">--</div>
     </div>
 
     <!-- WEATHER BAR -->
@@ -575,13 +508,6 @@
                 <div class="weather-value" id="current-lap">--/--</div>
             </div>
         </div>
-        <div class="weather-item">
-            <span class="weather-icon">⏱️</span>
-            <div>
-                <div class="weather-label">Tiempo</div>
-                <div class="weather-value" id="session-time">--:--</div>
-            </div>
-        </div>
     </div>
 
     <!-- MAIN LAYOUT -->
@@ -595,17 +521,16 @@
                         <th>Piloto</th>
                         <th>Vueltas</th>
                         <th>Gap</th>
-                        <th>Intervalo</th>
                         <th>Mejor Vuelta</th>
-                        <th>Sectores</th>
+                        <th>Sectores (S1/S2/S3)</th>
                         <th>Neumático</th>
                     </tr>
                 </thead>
                 <tbody id="timing-body">
                     <tr>
-                        <td colspan="8" class="loading-state">
+                        <td colspan="7" class="loading-state">
                             <div class="spinner"></div>
-                            <div>Conectando con OpenF1 API...</div>
+                            <div>Selecciona un Gran Premio para ver los datos</div>
                         </td>
                     </tr>
                 </tbody>
@@ -617,16 +542,16 @@
             <!-- RACE CONTROL -->
             <div class="sidebar-section">
                 <div class="sidebar-header">🏁 Race Control</div>
-                <div class="sidebar-content race-control-list" id="race-control">
-                    <div class="loading-state">Cargando mensajes...</div>
+                <div class="sidebar-content" id="race-control">
+                    <div class="loading-state">Esperando datos...</div>
                 </div>
             </div>
 
             <!-- CHAT -->
-            <div class="sidebar-section chat-section" style="flex: 1;">
+            <div class="sidebar-section chat-section">
                 <div class="sidebar-header">💬 Pit Wall Chat</div>
                 <div class="chat-messages" id="chat-messages">
-                    <div class="loading-state">Conectando chat...</div>
+                    <div class="loading-state">Conectando al chat...</div>
                 </div>
                 <div class="chat-input-area">
                     <input type="text" class="chat-input" id="chat-username" placeholder="Tu nombre" maxlength="15">
@@ -655,14 +580,13 @@
             appId: "1:123456789:web:abc123"
         };
 
-        // Inicializar Firebase
         let db;
         try {
             const app = initializeApp(firebaseConfig);
             db = getDatabase(app);
             setupChat();
         } catch (error) {
-            console.error("Firebase no configurado:", error);
+            console.log("Firebase no configurado - el chat no funcionará hasta que configures las claves");
         }
 
         function setupChat() {
@@ -677,7 +601,7 @@
 
         window.sendChat = async function() {
             if (!db) {
-                alert("Firebase no está configurado. Configura tu API key primero.");
+                alert("⚠️ Firebase no está configurado.\n\nPara activar el chat:\n1. Ve a Firebase Console\n2. Crea un proyecto\n3. Copia tu configuración\n4. Pégala en el código HTML");
                 return;
             }
 
@@ -698,6 +622,7 @@
                 userIn.value = user;
             } catch (error) {
                 console.error("Error enviando mensaje:", error);
+                alert("Error al enviar mensaje");
             }
         }
 
@@ -731,9 +656,8 @@
     <script>
         const API_BASE = "https://api.openf1.org/v1";
         let currentSessionKey = null;
-        let teamColors = {};
+        let allSessions = [];
 
-        // Colores de equipos
         const TEAM_COLORS = {
             'Red Bull': '#061D42',
             'Ferrari': '#DC0000',
@@ -747,41 +671,102 @@
             'Haas': '#B6BABD'
         };
 
-        // Compuestos de neumáticos
-        const TIRE_COMPOUNDS = {
-            'soft': { class: 'tire-soft', label: 'S' },
-            'medium': { class: 'tire-medium', label: 'M' },
-            'hard': { class: 'tire-hard', label: 'H' },
-            'intermediate': { class: 'tire-inter', label: 'I' },
-            'wet': { class: 'tire-wet', label: 'W' },
-            'unknown': { class: 'tire-hard', label: '?' }
-        };
-
-        async function fetchSession() {
+        // Cargar todas las sesiones de 2026
+        async function loadSessions() {
             try {
-                const today = new Date().toISOString().split('T')[0];
-                const response = await fetch(`${API_BASE}/sessions?date>=${today}`);
+                const select = document.getElementById('gp-select');
+                select.innerHTML = '<option value="">Cargando...</option>';
+                
+                // Cargar sesiones de 2026
+                const response = await fetch(`${API_BASE}/sessions?year=2026`);
                 const sessions = await response.json();
                 
-                if (sessions.length > 0) {
-                    const session = sessions[sessions.length - 1];
-                    currentSessionKey = session.session_key;
-                    
-                    document.getElementById('session-name').textContent = 
-                        `${session.session_name || 'Sesión F1'}`;
-                    document.getElementById('circuit-name').textContent = 
-                        `${session.country_name || ''} - ${session.circuit_name || ''}`;
-                    
-                    // Fetch all data
-                    fetchWeather();
-                    fetchTiming();
-                    fetchRaceControl();
-                } else {
-                    document.getElementById('session-name').textContent = "Sin sesión activa";
+                if (sessions.length === 0) {
+                    select.innerHTML = '<option value="">No hay datos de 2026 disponibles</option>';
+                    return;
                 }
+                
+                allSessions = sessions;
+                
+                // Filtrar solo carreras (Race)
+                const races = sessions.filter(s => 
+                    s.session_name?.includes('Race') || 
+                    s.session_name?.includes('Carrera')
+                ).sort((a, b) => new Date(a.date_start) - new Date(b.date_start));
+                
+                // Llenar selector
+                select.innerHTML = '<option value="">🏁 Selecciona un Gran Premio</option>';
+                
+                races.forEach(session => {
+                    const option = document.createElement('option');
+                    const flag = getCountryFlag(session.country_code);
+                    option.value = session.session_key;
+                    option.textContent = `${flag} ${session.country_name || session.circuit_name} - ${formatDate(session.date_start)}`;
+                    option.dataset.date = session.date_start;
+                    option.dataset.type = session.session_name;
+                    option.dataset.circuit = session.circuit_name;
+                    option.dataset.country = session.country_name;
+                    select.appendChild(option);
+                });
+
+                // Seleccionar automáticamente la última carrera disponible
+                if (races.length > 0) {
+                    const lastRace = races[races.length - 1];
+                    select.value = lastRace.session_key;
+                    loadSelectedSession();
+                }
+                
             } catch (error) {
-                console.error('Error fetching session:', error);
+                console.error('Error loading sessions:', error);
+                document.getElementById('gp-select').innerHTML = 
+                    '<option value="">❌ Error de conexión</option>';
             }
+        }
+
+        function getCountryFlag(code) {
+            const flags = {
+                'BHR': '🇧', 'SAU': '🇸🇦', 'AUS': '🇦🇺', 'JPN': '🇯🇵',
+                'CHN': '🇨', 'MIA': '🇸', 'ITA': '🇮🇹', 'MON': '🇲🇨',
+                'CAN': '🇨🇦', 'ESP': '🇪🇸', 'AUT': '🇦', 'GBR': '🇬🇧',
+                'HUN': '🇭🇺', 'BEL': '🇧🇪', 'NED': '🇳', 'SIN': '🇬',
+                'USA': '🇺', 'MEX': '🇽', 'BRA': '🇧🇷', 'LVG': '🇺🇸',
+                'QAT': '🇶🇦', 'UAE': '🇦🇪'
+            };
+            return flags[code] || '🏁';
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return '';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' });
+        }
+
+        // Cargar sesión seleccionada
+        window.loadSelectedSession = async function() {
+            const select = document.getElementById('gp-select');
+            const selectedOption = select.options[select.selectedIndex];
+            
+            if (!select.value) {
+                document.getElementById('timing-body').innerHTML = `
+                    <tr><td colspan="7" class="loading-state">Selecciona un Gran Premio</td></tr>
+                `;
+                return;
+            }
+
+            currentSessionKey = select.value;
+            
+            // Actualizar información
+            document.getElementById('circuit-name').textContent = 
+                `${selectedOption.dataset.circuit || '--'}`;
+            document.getElementById('session-date').textContent = 
+                `${selectedOption.dataset.country || ''} - ${selectedOption.dataset.date || '--'}`;
+            document.getElementById('session-type').textContent = 
+                selectedOption.dataset.type || '--';
+
+            // Cargar datos
+            fetchWeather();
+            fetchTiming();
+            fetchRaceControl();
         }
 
         async function fetchWeather() {
@@ -806,9 +791,14 @@
                 const response = await fetch(`${API_BASE}/timing?session_key=${currentSessionKey}`);
                 const data = await response.json();
                 
-                if (data.length === 0) return;
+                if (data.length === 0) {
+                    document.getElementById('timing-body').innerHTML = `
+                        <tr><td colspan="7" class="loading-state">No hay datos de timing disponibles para esta sesión</td></tr>
+                    `;
+                    return;
+                }
                 
-                // Get latest timing data for each driver
+                // Obtener último timing de cada piloto
                 const latestTiming = {};
                 data.forEach(entry => {
                     if (!latestTiming[entry.driver_number] || 
@@ -823,18 +813,18 @@
                 
                 renderTimingTable(drivers);
                 
-                // Update lap counter
                 const maxLap = Math.max(...drivers.map(d => d.laps_completed || 0));
-                const totalLaps = 58; // Default, could be fetched from session
-                document.getElementById('current-lap').textContent = `${maxLap}/${totalLaps}`;
+                document.getElementById('current-lap').textContent = `${maxLap}/58`;
                 
-                // Update timestamp
                 const now = new Date();
                 document.getElementById('last-update').textContent = 
                     `Actualizado: ${now.toLocaleTimeString()}`;
-                    
+                
             } catch (error) {
                 console.error('Error timing:', error);
+                document.getElementById('timing-body').innerHTML = `
+                    <tr><td colspan="7" class="loading-state">Error cargando datos de timing</td></tr>
+                `;
             }
         }
 
@@ -843,7 +833,6 @@
             tbody.innerHTML = '';
 
             drivers.forEach((driver, index) => {
-                // Get team color
                 let color = '#555';
                 for (const [team, c] of Object.entries(TEAM_COLORS)) {
                     if (driver.team_name?.includes(team)) {
@@ -852,34 +841,31 @@
                     }
                 }
 
-                // Gap formatting
                 let gapHtml = '<span class="gap-leader">Liderando</span>';
                 if (driver.gap_to_leader && driver.gap_to_leader > 0) {
-                    const gapSec = driver.gap_to_leader;
-                    gapHtml = `<span class="gap-positive">+${gapSec.toFixed(3)}s</span>`;
+                    gapHtml = `<span class="gap-positive">+${driver.gap_to_leader.toFixed(3)}s</span>`;
                 } else if (driver.interval_to_leader_ahead) {
                     gapHtml = `<span class="gap-positive">+${driver.interval_to_leader_ahead.toFixed(3)}s</span>`;
                 }
 
-                // Interval
-                const interval = driver.interval_to_car_ahead ? 
-                    `+${driver.interval_to_car_ahead.toFixed(3)}s` : '-';
-
-                // Best lap
                 const bestLap = driver.best_lap_time ? 
-                    formatTime(driver.best_lap_time) : '--:--.---';
+                    formatLapTime(driver.best_lap_time) : '--:--.---';
 
-                // Sectors
                 const sectors = driver.sectors ? `
                     <div class="sectors-display">
-                        <span class="sector-time">${driver.sectors[0] ? driver.sectors[0].toFixed(3) : '--'}</span>
-                        <span class="sector-time">${driver.sectors[1] ? driver.sectors[1].toFixed(3) : '--'}</span>
-                        <span class="sector-time">${driver.sectors[2] ? driver.sectors[2].toFixed(3) : '--'}</span>
+                        <span class="sector-time ${driver.sectors[0] < 20 ? 'sector-pb' : ''}">
+                            ${driver.sectors[0]?.toFixed(3) || '--'}
+                        </span>
+                        <span class="sector-time ${driver.sectors[1] < 20 ? 'sector-pb' : ''}">
+                            ${driver.sectors[1]?.toFixed(3) || '--'}
+                        </span>
+                        <span class="sector-time ${driver.sectors[2] < 20 ? 'sector-pb' : ''}">
+                            ${driver.sectors[2]?.toFixed(3) || '--'}
+                        </span>
                     </div>
                 ` : '<span>--</span>';
 
-                // Tire compound
-                const tireClass = TIRE_COMPOUNDS[driver.tire_compound?.toLowerCase()] || TIRE_COMPOUNDS.unknown;
+                const tireInfo = getTireInfo(driver.tire_compound);
 
                 const row = `
                     <tr>
@@ -887,7 +873,7 @@
                         <td>
                             <div class="driver-info">
                                 <div class="team-line" style="background: ${color}"></div>
-                                <div class="driver-details">
+                                <div>
                                     <div class="driver-number">#${driver.driver_number || '?'}</div>
                                     <div class="driver-name">${driver.driver_name || driver.driver_full_name || 'Desconocido'}</div>
                                     <div class="team-name">${driver.team_name || 'Equipo'}</div>
@@ -895,22 +881,32 @@
                             </div>
                         </td>
                         <td class="laps-col">${driver.laps_completed || 0}</td>
-                        <td class="gap-col">${gapHtml}</td>
-                        <td class="interval-col">${interval}</td>
+                        <td>${gapHtml}</td>
                         <td class="best-lap">${bestLap}</td>
                         <td>${sectors}</td>
-                        <td><span class="tire-compound ${tireClass.class}">${tireClass.label}</span></td>
+                        <td><span class="tire-compound ${tireInfo.class}">${tireInfo.label}</span></td>
                     </tr>
                 `;
                 tbody.innerHTML += row;
             });
         }
 
-        function formatTime(seconds) {
+        function formatLapTime(seconds) {
             if (!seconds) return '--:--.---';
             const mins = Math.floor(seconds / 60);
             const secs = (seconds % 60).toFixed(3);
             return `${mins}:${secs.padStart(6, '0')}`;
+        }
+
+        function getTireInfo(compound) {
+            const tires = {
+                'soft': { class: 'tire-soft', label: 'S' },
+                'medium': { class: 'tire-medium', label: 'M' },
+                'hard': { class: 'tire-hard', label: 'H' },
+                'intermediate': { class: 'tire-inter', label: 'I' },
+                'wet': { class: 'tire-wet', label: 'W' }
+            };
+            return tires[compound?.toLowerCase()] || { class: 'tire-hard', label: '?' };
         }
 
         async function fetchRaceControl() {
@@ -922,32 +918,31 @@
                     const container = document.getElementById('race-control');
                     container.innerHTML = '';
                     
-                    const latest = data.slice(-20).reverse();
+                    const latest = data.slice(-25).reverse();
                     latest.forEach(msg => {
                         const div = document.createElement('div');
                         div.className = 'rc-item';
                         const time = msg.date ? new Date(msg.date).toLocaleTimeString() : '--:--';
                         div.innerHTML = `
                             <span class="rc-lap">L${msg.lap || '--'}</span>
-                            <span>${msg.message || msg.flag || 'Mensaje'}</span>
+                            <span>${msg.message || msg.flag || 'Mensaje de carrera'}</span>
                             <span class="rc-time">${time}</span>
                         `;
                         container.appendChild(div);
                     });
+                } else {
+                    document.getElementById('race-control').innerHTML = 
+                        '<div class="loading-state">Sin mensajes de Race Control</div>';
                 }
             } catch (error) {
                 console.error('Error race control:', error);
             }
         }
 
-        // Initialize
-        fetchSession();
-        
-        // Auto-refresh
-        setInterval(fetchTiming, 5000);      // Every 5 seconds
-        setInterval(fetchWeather, 30000);     // Every 30 seconds
-        setInterval(fetchRaceControl, 15000); // Every 15 seconds
-        setInterval(fetchSession, 60000);     // Every minute
+        // Inicializar al cargar la página
+        document.addEventListener('DOMContentLoaded', () => {
+            loadSessions();
+        });
     </script>
 </body>
 </html>
