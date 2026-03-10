@@ -54,6 +54,7 @@
         .session-selector label {
             font-weight: 700;
             font-size: 0.9rem;
+            white-space: nowrap;
         }
 
         .session-selector select {
@@ -65,8 +66,16 @@
             font-family: inherit;
             font-size: 0.9rem;
             cursor: pointer;
-            max-width: 400px;
             font-weight: 600;
+        }
+
+        #year-select {
+            max-width: 100px;
+            border-color: var(--f1-red) !important;
+        }
+
+        #gp-select {
+            max-width: 400px;
         }
 
         .session-selector select:focus {
@@ -167,7 +176,16 @@
         }
 
         @media (max-width: 1200px) {
-            .main-layout { grid-template-columns: 1fr; }
+            .main-layout { 
+                grid-template-columns: 1fr;
+            }
+            .session-selector {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            #year-select, #gp-select {
+                max-width: 100%;
+            }
         }
 
         /* TIMING TABLE */
@@ -451,9 +469,16 @@
         <div class="logo">F1 ULTRA</div>
         
         <div class="session-selector">
-            <label for="gp-select">🏁 Temporada:</label>
+            <label for="year-select">📅 Año:</label>
+            <select id="year-select" onchange="changeYear()">
+                <option value="2026">2026</option>
+                <option value="2025">2025</option>
+                <option value="2024">2024</option>
+            </select>
+            
+            <label for="gp-select" style="margin-left: 15px;">🏁 Sesión:</label>
             <select id="gp-select" onchange="loadSelectedSession()">
-                <option value="">⏳ Cargando sesiones...</option>
+                <option value="">⏳ Cargando...</option>
             </select>
         </div>
 
@@ -658,6 +683,7 @@
         const API_BASE = "https://api.openf1.org/v1";
         let currentSessionKey = null;
         let allSessions = [];
+        let currentYear = 2026;
         let timingInterval = null;
         let weatherInterval = null;
         let rcInterval = null;
@@ -675,24 +701,28 @@
             'Haas': '#B6BABD'
         };
 
+        // Cambiar de año
+        window.changeYear = function() {
+            currentYear = parseInt(document.getElementById('year-select').value);
+            document.getElementById('live-status').textContent = currentYear;
+            loadSessions();
+        }
+
         // Cargar todas las sesiones
         async function loadSessions() {
             try {
                 const select = document.getElementById('gp-select');
                 select.innerHTML = '<option value="">⏳ Cargando...</option>';
                 
-                // Intentar 2026 primero
-                let response = await fetch(`${API_BASE}/sessions?year=2026`);
+                // Usar el año seleccionado
+                let response = await fetch(`${API_BASE}/sessions?year=${currentYear}`);
                 let sessions = await response.json();
                 
-                let displayYear = 2026;
-                
-                // Si no hay datos de 2026, usar 2024
-                if (sessions.length === 0) {
-                    console.log('⚠️ No hay datos de 2026, usando 2024...');
+                // Si no hay datos del año seleccionado, intentar con 2024
+                if (sessions.length === 0 && currentYear !== 2024) {
+                    console.log(`⚠️ No hay datos de ${currentYear}, intentando 2024...`);
                     response = await fetch(`${API_BASE}/sessions?year=2024`);
                     sessions = await response.json();
-                    displayYear = 2024;
                     
                     if (sessions.length === 0) {
                         select.innerHTML = '<option value="">❌ No hay datos disponibles</option>';
@@ -714,14 +744,14 @@
                 });
                 
                 // Llenar selector
-                select.innerHTML = `<option value="">🏁 Temporada ${displayYear} - Selecciona sesión</option>`;
+                select.innerHTML = `<option value="">🏁 ${currentYear} - Selecciona sesión</option>`;
                 
                 Object.keys(grouped).sort().forEach(circuit => {
                     const circuitSessions = grouped[circuit].sort((a, b) => 
                         new Date(a.date_start) - new Date(b.date_start)
                     );
                     
-                    // Grupo (desabilitado)
+                    // Grupo
                     const groupOption = document.createElement('option');
                     groupOption.disabled = true;
                     groupOption.textContent = `─── ${circuit} ───`;
@@ -799,11 +829,11 @@
         function getCountryFlag(code) {
             const flags = {
                 'BHR': '🇧', 'SAU': '🇸🇦', 'AUS': '🇦🇺', 'JPN': '🇯🇵',
-                'CHN': '🇨', 'MIA': '🇸', 'ITA': '🇮🇹', 'MON': '🇲🇨',
+                'CHN': '🇨', 'MIA': '🇸', 'ITA': '🇮🇹', 'MON': '🇲',
                 'CAN': '🇨', 'ESP': '🇸', 'AUT': '🇦', 'GBR': '🇬🇧',
                 'HUN': '🇭🇺', 'BEL': '🇧🇪', 'NED': '🇳', 'SIN': '🇬',
                 'USA': '🇺', 'MEX': '🇽', 'BRA': '🇧🇷', 'LVG': '🇺',
-                'QAT': '🇶🇦', 'UAE': '🇦🇪'
+                'QAT': '🇶', 'UAE': '🇪'
             };
             return flags[code] || '🏁';
         }
