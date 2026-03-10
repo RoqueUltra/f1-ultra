@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>F1 Ultra - Live Timing</title>
+    <title>F1 Ultra - Resultados</title>
     <link href="https://fonts.googleapis.com/css2?family=Titillium+Web:wght@300;400;600;700;900&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -15,17 +15,13 @@
             --text-secondary: #a0a0b0;
             --border-color: #2a2a3e;
         }
-
         * { margin: 0; padding: 0; box-sizing: border-box; }
-
         body {
             font-family: 'Titillium Web', sans-serif;
             background: var(--dark-bg);
             color: var(--text-primary);
             font-size: 14px;
         }
-
-        /* HEADER */
         .top-header {
             background: linear-gradient(135deg, var(--f1-red) 0%, #9e0000 100%);
             padding: 15px 30px;
@@ -34,29 +30,10 @@
             align-items: center;
             flex-wrap: wrap;
             gap: 15px;
-            box-shadow: 0 4px 20px rgba(225, 6, 0, 0.4);
         }
-
-        .logo {
-            font-size: 2.2rem;
-            font-weight: 900;
-            font-style: italic;
-            letter-spacing: 2px;
-        }
-
-        .session-selector {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-
-        .session-selector label {
-            font-weight: 700;
-            font-size: 0.9rem;
-            white-space: nowrap;
-        }
-
+        .logo { font-size: 2.2rem; font-weight: 900; font-style: italic; }
+        .session-selector { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+        .session-selector label { font-weight: 700; font-size: 0.9rem; }
         .session-selector select {
             padding: 10px 15px;
             background: var(--dark-bg);
@@ -68,536 +45,169 @@
             cursor: pointer;
             font-weight: 600;
         }
-
-        #year-select {
-            max-width: 100px;
-            border-color: var(--f1-red) !important;
-        }
-
-        #gp-select {
-            max-width: 400px;
-        }
-
-        .session-selector select:focus {
-            outline: none;
-            border-color: var(--f1-red);
-            box-shadow: 0 0 10px rgba(255,255,255,0.5);
-        }
-
+        #year-select { max-width: 100px; border-color: var(--f1-red) !important; }
+        #gp-select { max-width: 400px; }
         .live-indicator {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            background: white;
-            color: var(--f1-red);
-            padding: 8px 16px;
-            border-radius: 4px;
-            font-weight: 700;
-            font-size: 0.85rem;
+            display: flex; align-items: center; gap: 8px;
+            background: white; color: var(--f1-red);
+            padding: 8px 16px; border-radius: 4px;
+            font-weight: 700; font-size: 0.85rem;
         }
-
-        .live-dot {
-            width: 8px;
-            height: 8px;
-            background: #666;
-            border-radius: 50%;
-        }
-
-        .live-dot.active {
-            background: var(--f1-red);
-            animation: pulse 1.5s infinite;
-        }
-
-        /* SESSION INFO BAR */
         .session-info-bar {
-            background: var(--card-bg);
-            padding: 15px 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            background: var(--card-bg); padding: 15px 30px;
+            display: flex; justify-content: space-between;
             border-bottom: 2px solid var(--f1-red);
-            flex-wrap: wrap;
-            gap: 15px;
         }
-
-        .session-details {
-            display: flex;
-            gap: 30px;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-
-        .circuit-name {
-            font-size: 1.3rem;
-            font-weight: 700;
-        }
-
-        .session-meta {
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-        }
-
+        .circuit-name { font-size: 1.3rem; font-weight: 700; }
         .session-type {
-            background: var(--f1-red);
-            padding: 6px 20px;
-            border-radius: 4px;
-            font-weight: 700;
-            font-size: 0.9rem;
-            text-transform: uppercase;
+            background: var(--f1-red); padding: 6px 20px;
+            border-radius: 4px; font-weight: 700;
+            text-transform: uppercase; font-size: 0.9rem;
         }
-
-        /* WEATHER BAR */
-        .weather-bar {
-            background: var(--header-bg);
-            padding: 12px 30px;
-            display: flex;
-            justify-content: space-around;
-            border-bottom: 2px solid var(--border-color);
-            flex-wrap: wrap;
-            gap: 20px;
-        }
-
-        .weather-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .weather-icon { font-size: 1.5rem; }
-        .weather-label { color: var(--text-secondary); font-size: 0.75rem; text-transform: uppercase; }
-        .weather-value { font-weight: 700; min-width: 60px; font-size: 1rem; }
-
-        /* MAIN LAYOUT */
-        .main-layout {
-            display: grid;
-            grid-template-columns: 1fr 400px;
-            gap: 0;
-            min-height: calc(100vh - 200px);
-        }
-
-        @media (max-width: 1200px) {
-            .main-layout { 
-                grid-template-columns: 1fr;
-            }
-            .session-selector {
-                flex-direction: column;
-                align-items: stretch;
-            }
-            #year-select, #gp-select {
-                max-width: 100%;
-            }
-        }
-
-        /* TIMING TABLE */
-        .timing-container {
-            background: var(--card-bg);
-            overflow-x: auto;
-        }
-
-        .timing-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
+        .main-layout { display: grid; grid-template-columns: 1fr 400px; gap: 0; min-height: calc(100vh - 180px); }
+        @media (max-width: 1200px) { .main-layout { grid-template-columns: 1fr; } }
+        .timing-container { background: var(--card-bg); overflow-x: auto; }
+        .timing-table { width: 100%; border-collapse: collapse; }
         .timing-table thead {
-            background: var(--header-bg);
-            position: sticky;
-            top: 0;
-            z-index: 10;
+            background: var(--header-bg); position: sticky; top: 0; z-index: 10;
         }
-
         .timing-table th {
-            padding: 15px 10px;
-            text-align: left;
-            font-weight: 600;
-            text-transform: uppercase;
-            color: var(--text-secondary);
-            border-bottom: 2px solid var(--f1-red);
-            font-size: 0.8rem;
-            white-space: nowrap;
+            padding: 15px 10px; text-align: left; font-weight: 600;
+            text-transform: uppercase; color: var(--text-secondary);
+            border-bottom: 2px solid var(--f1-red); font-size: 0.8rem;
         }
-
-        .timing-table td {
-            padding: 12px 10px;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .timing-table tr:hover {
-            background: rgba(225, 6, 0, 0.15);
-        }
-
-        .pos-col {
-            font-weight: 700;
-            font-size: 1.1rem;
-            width: 50px;
-            color: var(--f1-red);
-            text-align: center;
-        }
-
-        .driver-info {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            min-width: 220px;
-        }
-
-        .team-line {
-            width: 4px;
-            height: 35px;
-            border-radius: 2px;
-        }
-
-        .driver-number {
-            font-size: 0.75rem;
-            color: var(--text-secondary);
-            font-weight: 600;
-        }
-
-        .driver-name {
-            font-weight: 700;
-            font-size: 0.95rem;
-        }
-
-        .team-name {
-            font-size: 0.8rem;
-            color: var(--text-secondary);
-        }
-
-        .laps-col {
-            text-align: center;
-            font-weight: 600;
-            width: 70px;
-        }
-
+        .timing-table td { padding: 12px 10px; border-bottom: 1px solid var(--border-color); }
+        .timing-table tr:hover { background: rgba(225, 6, 0, 0.15); }
+        .pos-col { font-weight: 700; font-size: 1.1rem; width: 50px; color: var(--f1-red); text-align: center; }
+        .driver-info { display: flex; align-items: center; gap: 12px; min-width: 220px; }
+        .team-line { width: 4px; height: 35px; border-radius: 2px; }
+        .driver-number { font-size: 0.75rem; color: var(--text-secondary); font-weight: 600; }
+        .driver-name { font-weight: 700; font-size: 0.95rem; }
+        .team-name { font-size: 0.8rem; color: var(--text-secondary); }
+        .laps-col { text-align: center; font-weight: 600; width: 70px; }
         .gap-positive { color: #4cd964; font-family: monospace; font-weight: 700; }
         .gap-leader { color: var(--text-secondary); font-family: monospace; }
-
         .best-lap { font-family: monospace; font-weight: 700; }
-
-        .sectors-display {
-            display: flex;
-            gap: 6px;
-            font-family: monospace;
-            font-size: 0.85rem;
-        }
-
-        .sector-time {
-            padding: 3px 6px;
-            border-radius: 3px;
-            background: rgba(255,255,255,0.05);
-            min-width: 55px;
-            text-align: center;
-        }
-
-        .sector-pb { color: #ff00ff; background: rgba(255, 0, 255, 0.2); font-weight: 700; }
-        .sector-personal { color: #00ff00; background: rgba(0, 255, 0, 0.2); }
-
         .tire-compound {
-            display: inline-block;
-            padding: 4px 10px;
-            border-radius: 4px;
-            font-size: 0.8rem;
-            font-weight: 700;
-            min-width: 45px;
-            text-align: center;
+            display: inline-block; padding: 4px 10px; border-radius: 4px;
+            font-size: 0.8rem; font-weight: 700; min-width: 45px; text-align: center;
         }
-
         .tire-soft { background: #da291c; color: white; }
         .tire-medium { background: #ffd700; color: black; }
         .tire-hard { background: #ffffff; color: black; }
-        .tire-inter { background: #00ff87; color: black; }
-        .tire-wet { background: #0093d0; color: white; }
-
-        /* SIDEBAR */
-        .sidebar {
-            background: var(--header-bg);
-            border-left: 2px solid var(--border-color);
-            display: flex;
-            flex-direction: column;
-        }
-
-        .sidebar-section {
-            border-bottom: 2px solid var(--border-color);
-        }
-
+        .sidebar { background: var(--header-bg); border-left: 2px solid var(--border-color); }
+        .sidebar-section { border-bottom: 2px solid var(--border-color); }
         .sidebar-header {
-            background: var(--card-bg);
-            padding: 12px 20px;
-            font-weight: 700;
-            text-transform: uppercase;
-            font-size: 0.95rem;
-            border-bottom: 2px solid var(--f1-red);
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            background: var(--card-bg); padding: 12px 20px; font-weight: 700;
+            text-transform: uppercase; border-bottom: 2px solid var(--f1-red);
         }
-
-        .sidebar-content {
-            padding: 15px;
-            max-height: 350px;
-            overflow-y: auto;
-        }
-
+        .sidebar-content { padding: 15px; max-height: 350px; overflow-y: auto; }
         .rc-item {
-            padding: 10px;
-            margin-bottom: 8px;
-            background: rgba(255,255,255,0.03);
-            border-left: 3px solid var(--f1-red);
-            border-radius: 0 4px 4px 0;
+            padding: 10px; margin-bottom: 8px; background: rgba(255,255,255,0.03);
+            border-left: 3px solid var(--f1-red); border-radius: 0 4px 4px 0;
             font-size: 0.85rem;
         }
-
         .rc-lap { font-weight: 700; color: var(--f1-red); margin-right: 8px; }
-        .rc-time { font-size: 0.75rem; color: var(--text-secondary); float: right; }
-
-        /* CHAT */
-        .chat-section { flex: 1; display: flex; flex-direction: column; }
-
         .chat-messages {
-            flex: 1;
-            overflow-y: auto;
-            padding: 15px;
-            background: rgba(0,0,0,0.2);
-            min-height: 300px;
-            max-height: 400px;
+            flex: 1; overflow-y: auto; padding: 15px;
+            background: rgba(0,0,0,0.2); min-height: 300px; max-height: 400px;
         }
-
         .chat-item {
-            margin-bottom: 12px;
-            padding: 10px;
-            background: rgba(255,255,255,0.05);
-            border-radius: 6px;
-            animation: slideIn 0.3s ease;
+            margin-bottom: 12px; padding: 10px;
+            background: rgba(255,255,255,0.05); border-radius: 6px;
         }
-
-        .chat-header {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 5px;
-        }
-
         .chat-username { font-weight: 700; color: var(--f1-red); font-size: 0.85rem; }
-        .chat-timestamp { font-size: 0.75rem; color: var(--text-secondary); }
-        .chat-message { font-size: 0.9rem; line-height: 1.4; word-wrap: break-word; }
-
         .chat-input-area {
-            padding: 15px;
-            background: var(--card-bg);
-            display: flex;
-            gap: 10px;
+            padding: 15px; background: var(--card-bg); display: flex; gap: 10px;
         }
-
         .chat-input {
-            flex: 1;
-            padding: 10px;
-            border: 1px solid var(--border-color);
-            background: var(--dark-bg);
-            color: white;
-            border-radius: 4px;
-            font-family: inherit;
+            flex: 1; padding: 10px; border: 1px solid var(--border-color);
+            background: var(--dark-bg); color: white; border-radius: 4px;
         }
-
-        .chat-input:focus { outline: none; border-color: var(--f1-red); }
-
         .chat-send {
-            padding: 10px 20px;
-            background: var(--f1-red);
-            color: white;
-            border: none;
-            border-radius: 4px;
-            font-weight: 700;
-            cursor: pointer;
-            text-transform: uppercase;
+            padding: 10px 20px; background: var(--f1-red); color: white;
+            border: none; border-radius: 4px; font-weight: 700; cursor: pointer;
         }
-
-        .chat-send:hover { background: #ff1a1a; }
-
-        /* LOADING & EMPTY STATES */
-        .loading-state {
-            text-align: center;
-            padding: 40px;
-            color: var(--text-secondary);
-        }
-
+        .loading-state { text-align: center; padding: 40px; color: var(--text-secondary); }
         .spinner {
-            border: 3px solid var(--border-color);
-            border-top: 3px solid var(--f1-red);
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 15px;
+            border: 3px solid var(--border-color); border-top: 3px solid var(--f1-red);
+            border-radius: 50%; width: 40px; height: 40px;
+            animation: spin 1s linear infinite; margin: 0 auto 15px;
         }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.5; transform: scale(0.95); }
-        }
-
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* SCROLLBAR */
-        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: var(--dark-bg); }
         ::-webkit-scrollbar-thumb { background: var(--f1-red); border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #ff1a1a; }
-
-        .last-update {
-            position: fixed;
-            bottom: 10px;
-            right: 10px;
-            background: var(--card-bg);
-            padding: 8px 15px;
-            border-radius: 4px;
-            font-size: 0.8rem;
-            color: var(--text-secondary);
-            border: 1px solid var(--border-color);
-        }
     </style>
 </head>
 <body>
-    <!-- TOP HEADER -->
     <div class="top-header">
         <div class="logo">F1 ULTRA</div>
-        
         <div class="session-selector">
             <label for="year-select">📅 Año:</label>
             <select id="year-select" onchange="changeYear()">
-                <option value="2026">2026</option>
-                <option value="2025">2025</option>
                 <option value="2024">2024</option>
+                <option value="2023">2023</option>
+                <option value="2022">2022</option>
+                <option value="2021">2021</option>
+                <option value="2020">2020</option>
             </select>
-            
-            <label for="gp-select" style="margin-left: 15px;">🏁 Sesión:</label>
-            <select id="gp-select" onchange="loadSelectedSession()">
+            <label for="gp-select" style="margin-left: 15px;">🏁 Gran Premio:</label>
+            <select id="gp-select" onchange="loadSelectedRace()">
                 <option value="">⏳ Cargando...</option>
             </select>
         </div>
-
-        <div class="live-indicator">
-            <div class="live-dot" id="live-dot"></div>
-            <span id="live-status">Cargando...</span>
-        </div>
+        <div class="live-indicator">📦 HISTÓRICO</div>
     </div>
-
-    <!-- SESSION INFO -->
     <div class="session-info-bar">
-        <div class="session-details">
-            <div class="circuit-name" id="circuit-name">Selecciona una sesión</div>
-            <div class="session-meta" id="session-date">--</div>
+        <div>
+            <div class="circuit-name" id="circuit-name">Selecciona un GP</div>
+            <div id="race-date" style="color: var(--text-secondary); font-size: 0.9rem;">--</div>
         </div>
-        <div class="session-type" id="session-type">--</div>
+        <div class="session-type" id="session-type">Carrera</div>
     </div>
-
-    <!-- WEATHER BAR -->
-    <div class="weather-bar">
-        <div class="weather-item">
-            <span class="weather-icon">🌡️</span>
-            <div>
-                <div class="weather-label">Aire</div>
-                <div class="weather-value" id="air-temp">--°C</div>
-            </div>
-        </div>
-        <div class="weather-item">
-            <span class="weather-icon"></span>
-            <div>
-                <div class="weather-label">Pista</div>
-                <div class="weather-value" id="track-temp">--°C</div>
-            </div>
-        </div>
-        <div class="weather-item">
-            <span class="weather-icon">💧</span>
-            <div>
-                <div class="weather-label">Humedad</div>
-                <div class="weather-value" id="humidity">--%</div>
-            </div>
-        </div>
-        <div class="weather-item">
-            <span class="weather-icon">💨</span>
-            <div>
-                <div class="weather-label">Viento</div>
-                <div class="weather-value" id="wind-speed">-- m/s</div>
-            </div>
-        </div>
-        <div class="weather-item">
-            <span class="weather-icon">🏁</span>
-            <div>
-                <div class="weather-label">Vuelta</div>
-                <div class="weather-value" id="current-lap">--/--</div>
-            </div>
-        </div>
-    </div>
-
-    <!-- MAIN LAYOUT -->
     <div class="main-layout">
-        <!-- TIMING TABLE -->
         <div class="timing-container">
             <table class="timing-table">
                 <thead>
                     <tr>
-                        <th>Pos</th>
-                        <th>Piloto</th>
-                        <th>Vueltas</th>
-                        <th>Gap</th>
-                        <th>Mejor Vuelta</th>
-                        <th>Sectores (S1/S2/S3)</th>
-                        <th>Neumático</th>
+                        <th>Pos</th><th>Piloto</th><th>Equipo</th><th>Vueltas</th>
+                        <th>Tiempo/Gap</th><th>Puntos</th><th>V. Rápida</th>
                     </tr>
                 </thead>
                 <tbody id="timing-body">
-                    <tr>
-                        <td colspan="7" class="loading-state">
-                            <div class="spinner"></div>
-                            <div>Selecciona una sesión para ver los datos</div>
-                        </td>
-                    </tr>
+                    <tr><td colspan="7" class="loading-state"><div class="spinner"></div>Cargando datos de Ergast API...</td></tr>
                 </tbody>
             </table>
         </div>
-
-        <!-- SIDEBAR -->
         <div class="sidebar">
-            <!-- RACE CONTROL -->
             <div class="sidebar-section">
                 <div class="sidebar-header">🏁 Race Control</div>
                 <div class="sidebar-content" id="race-control">
-                    <div class="loading-state">Esperando datos...</div>
+                    <div class="rc-item"><span class="rc-lap">INFO</span>Datos históricos de Ergast API</div>
                 </div>
             </div>
-
-            <!-- CHAT -->
-            <div class="sidebar-section chat-section">
-                <div class="sidebar-header">💬 Pit Wall Chat</div>
+            <div class="sidebar-section">
+                <div class="sidebar-header">💬 Chat</div>
                 <div class="chat-messages" id="chat-messages">
-                    <div class="loading-state">Conectando al chat...</div>
+                    <div class="chat-item"><div class="chat-username">Admin</div><div>Chat disponible con Firebase</div></div>
                 </div>
                 <div class="chat-input-area">
-                    <input type="text" class="chat-input" id="chat-username" placeholder="Tu nombre" maxlength="15">
-                    <input type="text" class="chat-input" id="chat-text" placeholder="Escribe un mensaje..." maxlength="200">
+                    <input type="text" class="chat-input" id="chat-username" placeholder="Nombre" maxlength="15">
+                    <input type="text" class="chat-input" id="chat-text" placeholder="Mensaje..." maxlength="200">
                     <button class="chat-send" onclick="sendChat()">Enviar</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="last-update" id="last-update">Actualizado: --:--:--</div>
-
-    <!-- FIREBASE SDK -->
     <script type="module">
+        // Firebase (opcional para chat)
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
         import { getDatabase, ref, push, onChildAdded, query, limitToLast } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
-
-        // ⚠️ REEMPLAZA ESTO CON TU CONFIGURACIÓN DE FIREBASE
+        
         const firebaseConfig = {
-            apiKey: "TU_API_KEY_AQUI",
+            apiKey: "TU_API_KEY",
             authDomain: "TU_PROYECTO.firebaseapp.com",
             databaseURL: "https://TU_PROYECTO-default-rtdb.firebaseio.com",
             projectId: "TU_PROYECTO",
@@ -605,499 +215,146 @@
             messagingSenderId: "123456789",
             appId: "1:123456789:web:abc123"
         };
-
+        
         let db;
         try {
             const app = initializeApp(firebaseConfig);
             db = getDatabase(app);
             setupChat();
-        } catch (error) {
-            console.log("Firebase no configurado - el chat no funcionará hasta que configures las claves");
-        }
-
+        } catch(e) { console.log("Firebase no configurado"); }
+        
         function setupChat() {
-            const messagesRef = ref(db, 'messages');
-            const q = query(messagesRef, limitToLast(50));
-            
-            onChildAdded(q, (snapshot) => {
-                const data = snapshot.val();
-                addChatMessage(data.user, data.text, data.time);
+            const q = query(ref(db, 'messages'), limitToLast(50));
+            onChildAdded(q, (s) => {
+                const d = s.val();
+                addChat(d.user, d.text, d.time);
             });
         }
-
         window.sendChat = async function() {
-            if (!db) {
-                alert("⚠️ Firebase no está configurado.\n\nPara activar el chat:\n1. Ve a Firebase Console\n2. Crea un proyecto\n3. Copia tu configuración\n4. Pégala en el código HTML");
-                return;
-            }
-
-            const userIn = document.getElementById('chat-username');
-            const textIn = document.getElementById('chat-text');
-            const user = userIn.value.trim() || 'Anónimo';
-            const text = textIn.value.trim();
-            
-            if (!text) return;
-
-            try {
-                await push(ref(db, 'messages'), {
-                    user: user,
-                    text: text,
-                    time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
-                });
-                textIn.value = '';
-                userIn.value = user;
-            } catch (error) {
-                console.error("Error enviando mensaje:", error);
-                alert("Error al enviar mensaje");
-            }
+            if(!db) return alert("Configura Firebase");
+            const u = document.getElementById('chat-username').value||'Anónimo';
+            const t = document.getElementById('chat-text').value.trim();
+            if(!t) return;
+            await push(ref(db,'messages'), {user:u, text:t, time:new Date().toLocaleTimeString()});
+            document.getElementById('chat-text').value='';
         }
-
-        function addChatMessage(user, text, time) {
-            const container = document.getElementById('chat-messages');
-            if (container.children[0]?.classList.contains('loading-state')) {
-                container.innerHTML = '';
-            }
-            
-            const msg = document.createElement('div');
-            msg.className = 'chat-item';
-            msg.innerHTML = `
-                <div class="chat-header">
-                    <span class="chat-username">${escapeHtml(user)}</span>
-                    <span class="chat-timestamp">${time}</span>
-                </div>
-                <div class="chat-message">${escapeHtml(text)}</div>
-            `;
-            container.appendChild(msg);
-            container.scrollTop = container.scrollHeight;
-        }
-
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
+        function addChat(u,t,time) {
+            const c = document.getElementById('chat-messages');
+            if(c.children[0]?.classList.contains('loading-state')) c.innerHTML='';
+            c.innerHTML += `<div class="chat-item"><div class="chat-username">${u}</div><div>${t}</div></div>`;
+            c.scrollTop = c.scrollHeight;
         }
     </script>
 
-    <!-- F1 DATA API -->
     <script>
-        const API_BASE = "https://api.openf1.org/v1";
-        let currentSessionKey = null;
-        let allSessions = [];
-        let currentYear = 2026;
-        let timingInterval = null;
-        let weatherInterval = null;
-        let rcInterval = null;
-
+        const ERGAST_API = "https://ergast.com/api/f1";
+        let currentRaceUrl = null;
         const TEAM_COLORS = {
-            'Red Bull': '#061D42',
-            'Ferrari': '#DC0000',
-            'Mercedes': '#00D2BE',
-            'McLaren': '#FF8700',
-            'Aston Martin': '#006F62',
-            'Alpine': '#0090FF',
-            'Williams': '#005AFF',
-            'RB': '#1634CB',
-            'Sauber': '#52E252',
-            'Haas': '#B6BABD'
+            'Red Bull': '#061D42', 'Ferrari': '#DC0000', 'Mercedes': '#00D2BE',
+            'McLaren': '#FF8700', 'Aston Martin': '#006F62', 'Alpine': '#0090FF',
+            'Williams': '#005AFF', 'RB': '#1634CB', 'Sauber': '#52E252', 'Haas': '#B6BABD'
         };
 
-        // Cambiar de año
+        let currentYear = 2024;
+
         window.changeYear = function() {
-            currentYear = parseInt(document.getElementById('year-select').value);
-            document.getElementById('live-status').textContent = currentYear;
-            loadSessions();
+            currentYear = document.getElementById('year-select').value;
+            loadRaces();
         }
 
-        // Cargar todas las sesiones
-        async function loadSessions() {
-            try {
-                const select = document.getElementById('gp-select');
-                select.innerHTML = '<option value="">⏳ Cargando...</option>';
-                
-                // Usar el año seleccionado
-                let response = await fetch(`${API_BASE}/sessions?year=${currentYear}`);
-                let sessions = await response.json();
-                
-                // Si no hay datos del año seleccionado, intentar con 2024
-                if (sessions.length === 0 && currentYear !== 2024) {
-                    console.log(`⚠️ No hay datos de ${currentYear}, intentando 2024...`);
-                    response = await fetch(`${API_BASE}/sessions?year=2024`);
-                    sessions = await response.json();
-                    
-                    if (sessions.length === 0) {
-                        select.innerHTML = '<option value="">❌ No hay datos disponibles</option>';
-                        return;
-                    }
-                }
-                
-                allSessions = sessions;
-                
-                // Agrupar por circuito
-                const grouped = {};
-                
-                sessions.forEach(session => {
-                    const circuit = session.circuit_name || session.country_name || 'Unknown';
-                    if (!grouped[circuit]) {
-                        grouped[circuit] = [];
-                    }
-                    grouped[circuit].push(session);
-                });
-                
-                // Llenar selector
-                select.innerHTML = `<option value="">🏁 ${currentYear} - Selecciona sesión</option>`;
-                
-                Object.keys(grouped).sort().forEach(circuit => {
-                    const circuitSessions = grouped[circuit].sort((a, b) => 
-                        new Date(a.date_start) - new Date(b.date_start)
-                    );
-                    
-                    // Grupo
-                    const groupOption = document.createElement('option');
-                    groupOption.disabled = true;
-                    groupOption.textContent = `─── ${circuit} ───`;
-                    select.appendChild(groupOption);
-                    
-                    // Cada sesión
-                    circuitSessions.forEach(session => {
-                        const option = document.createElement('option');
-                        const flag = getCountryFlag(session.country_code);
-                        const sessionLabel = formatSessionName(session.session_name);
-                        const date = formatDate(session.date_start);
-                        
-                        option.value = session.session_key;
-                        option.textContent = `   ${sessionLabel} - ${date}`;
-                        option.dataset.date = session.date_start;
-                        option.dataset.type = session.session_name;
-                        option.dataset.circuit = circuit;
-                        option.dataset.country = session.country_name;
-                        option.dataset.session_key = session.session_key;
-                        
-                        select.appendChild(option);
-                    });
-                    
-                    // Espacio
-                    const spacer = document.createElement('option');
-                    spacer.disabled = true;
-                    spacer.textContent = '';
-                    select.appendChild(spacer);
-                });
-                
-                // Seleccionar última carrera automáticamente
-                const raceSessions = sessions.filter(s => 
-                    s.session_name?.includes('Race') || s.session_name?.includes('Carrera')
-                );
-                
-                if (raceSessions.length > 0) {
-                    const lastRace = raceSessions.sort((a, b) => 
-                        new Date(b.date_start) - new Date(a.date_start)
-                    )[0];
-                    select.value = lastRace.session_key;
-                    await loadSelectedSession();
-                }
-                
-            } catch (error) {
-                console.error('Error loading sessions:', error);
-                document.getElementById('gp-select').innerHTML = 
-                    '<option value="">❌ Error: ' + error.message + '</option>';
-            }
-        }
-
-        function formatSessionName(sessionName) {
-            if (!sessionName) return 'Sesión';
-            
-            const mappings = {
-                'Practice 1': '🔵 Práctica 1',
-                'Practice 2': '🔵 Práctica 2',
-                'Practice 3': '🔵 Práctica 3',
-                'Qualifying': '🟣 Clasificación',
-                'Sprint Qualifying': '🟣 Sprint Shootout',
-                'Sprint': '🏁 Sprint',
-                'Race': '🏁 Carrera',
-                'Carrera': '🏁 Carrera',
-                'Clasificación': '🟣 Clasificación'
-            };
-            
-            for (const [key, label] of Object.entries(mappings)) {
-                if (sessionName.includes(key)) {
-                    return label;
-                }
-            }
-            
-            return sessionName;
-        }
-
-        function getCountryFlag(code) {
-            const flags = {
-                'BHR': '🇧', 'SAU': '🇸🇦', 'AUS': '🇦🇺', 'JPN': '🇯🇵',
-                'CHN': '🇨', 'MIA': '🇸', 'ITA': '🇮🇹', 'MON': '🇲',
-                'CAN': '🇨', 'ESP': '🇸', 'AUT': '🇦', 'GBR': '🇬🇧',
-                'HUN': '🇭🇺', 'BEL': '🇧🇪', 'NED': '🇳', 'SIN': '🇬',
-                'USA': '🇺', 'MEX': '🇽', 'BRA': '🇧🇷', 'LVG': '🇺',
-                'QAT': '🇶', 'UAE': '🇪'
-            };
-            return flags[code] || '🏁';
-        }
-
-        function formatDate(dateString) {
-            if (!dateString) return '';
-            const date = new Date(dateString);
-            return date.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' });
-        }
-
-        // Cargar sesión seleccionada
-        window.loadSelectedSession = async function() {
+        async function loadRaces() {
             const select = document.getElementById('gp-select');
-            const selectedOption = select.options[select.selectedIndex];
-            
-            if (!select.value || !selectedOption.dataset.session_key) {
-                document.getElementById('timing-body').innerHTML = `
-                    <tr><td colspan="7" class="loading-state">Selecciona una sesión</td></tr>
-                `;
-                return;
-            }
-
-            currentSessionKey = selectedOption.dataset.session_key;
-            
-            // Actualizar UI
-            const sessionType = selectedOption.dataset.type || '';
-            const formattedType = formatSessionName(sessionType);
-            const sessionDate = new Date(selectedOption.dataset.date);
-            const now = new Date();
-            
-            document.getElementById('circuit-name').textContent = 
-                `${selectedOption.dataset.circuit || '--'}`;
-            document.getElementById('session-date').textContent = 
-                `${selectedOption.dataset.country || ''} - ${selectedOption.dataset.date || '--'}`;
-            document.getElementById('session-type').textContent = formattedType;
-            
-            // Determinar si es EN VIVO o HISTÓRICO
-            const timeDiff = now - sessionDate;
-            const hoursDiff = timeDiff / (1000 * 60 * 60);
-            
-            const liveIndicator = document.getElementById('live-status');
-            const liveDot = document.getElementById('live-dot');
-            
-            // Limpiar intervals anteriores
-            if (timingInterval) clearInterval(timingInterval);
-            if (weatherInterval) clearInterval(weatherInterval);
-            if (rcInterval) clearInterval(rcInterval);
-            
-            if (hoursDiff < 3 && hoursDiff > -1) {
-                // EN VIVO - sesión ocurriendo ahora
-                liveIndicator.textContent = 'EN VIVO';
-                liveDot.classList.add('active');
-                
-                // Auto-refresh
-                timingInterval = setInterval(fetchTiming, 5000);
-                weatherInterval = setInterval(fetchWeather, 30000);
-                rcInterval = setInterval(fetchRaceControl, 10000);
-                
-            } else {
-                // HISTÓRICO
-                const daysAgo = Math.floor(hoursDiff / 24);
-                liveIndicator.textContent = daysAgo >= 1 ? `HISTÓRICO (${daysAgo} días)` : 'HISTÓRICO';
-                liveDot.classList.remove('active');
-            }
-            
-            // Cargar datos
-            await Promise.all([
-                fetchWeather(),
-                fetchTiming(),
-                fetchRaceControl()
-            ]);
-        }
-
-        async function fetchWeather() {
+            select.innerHTML = '<option value="">⏳ Cargando...</option>';
             try {
-                const response = await fetch(`${API_BASE}/weather?session_key=${currentSessionKey}`);
-                const data = await response.json();
-                
-                if (data.length > 0) {
-                    const w = data[data.length - 1];
-                    document.getElementById('air-temp').textContent = `${Math.round(w.air_temperature || 20)}°C`;
-                    document.getElementById('track-temp').textContent = `${Math.round(w.track_temperature || 25)}°C`;
-                    document.getElementById('humidity').textContent = `${Math.round(w.humidity || 50)}%`;
-                    document.getElementById('wind-speed').textContent = `${(w.wind_speed || 0).toFixed(1)} m/s`;
-                }
-            } catch (error) {
-                console.error('Error weather:', error);
-            }
-        }
-
-        async function fetchTiming() {
-            try {
-                const response = await fetch(`${API_BASE}/timing?session_key=${currentSessionKey}`);
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                }
-                
-                const data = await response.json();
-                
-                // Verificar que data sea un array
-                if (!Array.isArray(data)) {
-                    console.error('Data no es un array:', data);
-                    throw new Error('Formato de datos inválido');
-                }
-                
-                if (data.length === 0) {
-                    document.getElementById('timing-body').innerHTML = `
-                        <tr>
-                            <td colspan="7" class="loading-state">
-                                ⚠️ No hay datos de timing disponibles<br>
-                                <small style="color: var(--text-secondary);">
-                                    Intenta seleccionar otra sesión
-                                </small>
-                            </td>
-                        </tr>
-                    `;
-                    return;
-                }
-                
-                // Obtener último timing de cada piloto
-                const latestTiming = {};
-                data.forEach(entry => {
-                    if (!latestTiming[entry.driver_number] || 
-                        new Date(entry.date) > new Date(latestTiming[entry.driver_number].date)) {
-                        latestTiming[entry.driver_number] = entry;
-                    }
+                const res = await fetch(`${ERGAST_API}/${currentYear}.json?limit=40`);
+                const data = await res.json();
+                const races = data.MRData.RaceTable.Races;
+                select.innerHTML = '<option value="">🏁 Selecciona un Gran Premio</option>';
+                races.forEach(race => {
+                    const opt = document.createElement('option');
+                    opt.value = race.url;
+                    opt.textContent = `${getFlag(race.Circuit?.Location?.country)} ${race.raceName} - ${race.date}`;
+                    opt.dataset.circuit = race.Circuit?.circuitName || '';
+                    opt.dataset.date = race.date;
+                    opt.dataset.racename = race.raceName;
+                    select.appendChild(opt);
                 });
-                
-                const drivers = Object.values(latestTiming).sort((a, b) => 
-                    (a.position || 99) - (b.position || 99)
-                );
-                
-                renderTimingTable(drivers);
-                
-                const maxLap = Math.max(...drivers.map(d => d.laps_completed || 0));
-                document.getElementById('current-lap').textContent = `${maxLap}/58`;
-                
-                const now = new Date();
-                document.getElementById('last-update').textContent = 
-                    `Actualizado: ${now.toLocaleTimeString()}`;
-                
-            } catch (error) {
-                console.error('Error timing:', error);
-                document.getElementById('timing-body').innerHTML = `
-                    <tr>
-                        <td colspan="7" class="loading-state">
-                            ❌ Error: ${error.message}<br><br>
-                            <small style="color: var(--text-secondary);">
-                                💡 La API no tiene datos para esta sesión
-                            </small>
-                        </td>
-                    </tr>
-                `;
+                if(races.length > 0) {
+                    select.value = races[races.length-1].url;
+                    loadSelectedRace();
+                }
+            } catch(e) {
+                select.innerHTML = '<option value="">❌ Error cargando carreras</option>';
+                console.error(e);
             }
         }
 
-        function renderTimingTable(drivers) {
+        window.loadSelectedRace = async function() {
+            const select = document.getElementById('gp-select');
+            const opt = select.options[select.selectedIndex];
+            if(!select.value) return;
+            currentRaceUrl = select.value;
+            document.getElementById('circuit-name').textContent = opt.dataset.circuit;
+            document.getElementById('race-date').textContent = opt.dataset.date;
+            document.getElementById('session-type').textContent = 'Carrera';
+            await loadRaceResults();
+        }
+
+        async function loadRaceResults() {
+            const tbody = document.getElementById('timing-body');
+            tbody.innerHTML = '<tr><td colspan="7" class="loading-state"><div class="spinner"></div>Cargando resultados...</td></tr>';
+            try {
+                const res = await fetch(`${currentRaceUrl}/results.json?limit=40`);
+                const data = await res.json();
+                const results = data.MRData.RaceTable.Races[0]?.Results || [];
+                if(results.length === 0) throw new Error('Sin resultados');
+                renderTable(results);
+            } catch(e) {
+                tbody.innerHTML = `<tr><td colspan="7" class="loading-state">❌ Error: ${e.message}</td></tr>`;
+            }
+        }
+
+        function renderTable(results) {
             const tbody = document.getElementById('timing-body');
             tbody.innerHTML = '';
-
-            drivers.forEach((driver, index) => {
+            results.forEach(r => {
                 let color = '#555';
-                for (const [team, c] of Object.entries(TEAM_COLORS)) {
-                    if (driver.team_name?.includes(team)) {
-                        color = c;
-                        break;
-                    }
+                for(const [t,c] of Object.entries(TEAM_COLORS)) {
+                    if(r.Constructor?.name?.includes(t)) { color = c; break; }
                 }
-
-                let gapHtml = '<span class="gap-leader">Liderando</span>';
-                if (driver.gap_to_leader && driver.gap_to_leader > 0) {
-                    gapHtml = `<span class="gap-positive">+${driver.gap_to_leader.toFixed(3)}s</span>`;
-                }
-
-                const bestLap = driver.best_lap_time ? 
-                    formatLapTime(driver.best_lap_time) : '--:--.---';
-
-                const sectors = driver.sectors ? `
-                    <div class="sectors-display">
-                        <span class="sector-time">${driver.sectors[0]?.toFixed(3) || '--'}</span>
-                        <span class="sector-time">${driver.sectors[1]?.toFixed(3) || '--'}</span>
-                        <span class="sector-time">${driver.sectors[2]?.toFixed(3) || '--'}</span>
-                    </div>
-                ` : '<span>--</span>';
-
-                const tireInfo = getTireInfo(driver.tire_compound);
-
+                const time = r.Time?.time || (r.status !== 'Finished' ? r.status : '+1 Vuelta');
+                const gap = r.Time?.gap ? `+${r.Time.gap}` : (r.position==='1' ? 'Liderando' : '');
+                const fastLap = r.FastestLap?.Time?.time || '--:--.---';
                 const row = `
                     <tr>
-                        <td class="pos-col">${driver.position || index + 1}</td>
+                        <td class="pos-col">${r.position}</td>
                         <td>
                             <div class="driver-info">
-                                <div class="team-line" style="background: ${color}"></div>
+                                <div class="team-line" style="background:${color}"></div>
                                 <div>
-                                    <div class="driver-number">#${driver.driver_number || '?'}</div>
-                                    <div class="driver-name">${driver.driver_name || driver.driver_full_name || 'Desconocido'}</div>
-                                    <div class="team-name">${driver.team_name || 'Equipo'}</div>
+                                    <div class="driver-number">#${r.Driver?.permanentNumber||'--'}</div>
+                                    <div class="driver-name">${r.Driver?.givenName} ${r.Driver?.familyName}</div>
+                                    <div class="team-name">${r.Constructor?.name}</div>
                                 </div>
                             </div>
                         </td>
-                        <td class="laps-col">${driver.laps_completed || 0}</td>
-                        <td>${gapHtml}</td>
-                        <td class="best-lap">${bestLap}</td>
-                        <td>${sectors}</td>
-                        <td><span class="tire-compound ${tireInfo.class}">${tireInfo.label}</span></td>
-                    </tr>
-                `;
+                        <td>${r.Constructor?.name}</td>
+                        <td class="laps-col">${r.laps}</td>
+                        <td><span class="${gap==='Liderando'?'gap-leader':'gap-positive'}">${gap || time}</span></td>
+                        <td style="text-align:center;font-weight:700">${r.points}</td>
+                        <td class="best-lap">${fastLap}</td>
+                    </tr>`;
                 tbody.innerHTML += row;
             });
         }
 
-        function formatLapTime(seconds) {
-            if (!seconds) return '--:--.---';
-            const mins = Math.floor(seconds / 60);
-            const secs = (seconds % 60).toFixed(3);
-            return `${mins}:${secs.padStart(6, '0')}`;
+        function getFlag(country) {
+            const f = {'Australia':'🇦🇺','Bahrain':'🇧','Saudi Arabia':'🇸🇦','Japan':'🇯🇵','China':'🇨','USA':'🇺','Monaco':'🇲','Spain':'🇪','Canada':'🇨','Great Britain':'🇬🇧','Italy':'🇮🇹','Belgium':'🇧🇪','Netherlands':'🇳','Singapore':'🇬','Mexico':'🇲🇽','Brazil':'🇧🇷','Abu Dhabi':'🇦🇪'};
+            return f[country] || '🏁';
         }
 
-        function getTireInfo(compound) {
-            const tires = {
-                'soft': { class: 'tire-soft', label: 'S' },
-                'medium': { class: 'tire-medium', label: 'M' },
-                'hard': { class: 'tire-hard', label: 'H' },
-                'intermediate': { class: 'tire-inter', label: 'I' },
-                'wet': { class: 'tire-wet', label: 'W' }
-            };
-            return tires[compound?.toLowerCase()] || { class: 'tire-hard', label: '?' };
-        }
-
-        async function fetchRaceControl() {
-            try {
-                const response = await fetch(`${API_BASE}/race_control?session_key=${currentSessionKey}`);
-                const data = await response.json();
-                
-                if (data.length > 0) {
-                    const container = document.getElementById('race-control');
-                    container.innerHTML = '';
-                    
-                    const latest = data.slice(-25).reverse();
-                    latest.forEach(msg => {
-                        const div = document.createElement('div');
-                        div.className = 'rc-item';
-                        const time = msg.date ? new Date(msg.date).toLocaleTimeString() : '--:--';
-                        div.innerHTML = `
-                            <span class="rc-lap">L${msg.lap || '--'}</span>
-                            <span>${msg.message || msg.flag || 'Mensaje'}</span>
-                            <span class="rc-time">${time}</span>
-                        `;
-                        container.appendChild(div);
-                    });
-                } else {
-                    document.getElementById('race-control').innerHTML = 
-                        '<div class="loading-state">Sin mensajes</div>';
-                }
-            } catch (error) {
-                console.error('Error race control:', error);
-            }
-        }
-
-        // Inicializar
-        document.addEventListener('DOMContentLoaded', () => {
-            loadSessions();
-        });
+        // Init
+        loadRaces();
     </script>
 </body>
 </html>
