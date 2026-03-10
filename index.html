@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>F1 Ultra - Live Timing</title>
+    <link href="https://fonts.googleapis.com/css2?family=Titillium+Web:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --f1-red: #e10600;
+            --dark-bg: #0f0f1a;
+            --card-bg: #1a1a2e;
+            --header-bg: #161625;
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0b0;
+            --border-color: #2a2a3e;
+            --sector-purple: #ff00ff;
+            --sector-green: #00ff00;
+            --sector-yellow: #ffff00;
+            --purple-bg: rgba(255, 0, 255, 0.2);
+            --green-bg: rgba(0, 255, 0, 0.2);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Titillium Web', sans-serif;
+            background: var(--dark-bg);
+            color: var(--text-primary);
+            font-size: 14px;
+        }
+
+        /* HEADER */
+        .top-header {
+            background: linear-gradient(135deg, var(--f1-red) 0%, #9e0000 100%);
+            padding: 10px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 20px rgba(225, 6, 0, 0.4);
+        }
+
+        .logo {
+            font-size: 2rem;
+            font-weight: 900;
+            font-style: italic;
+            letter-spacing: 2px;
+        }
+
+        .session-header {
+            text-align: center;
+        }
+
+        .session-name {
+            font-size: 1.4rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .session-circuit {
+            font-size: 0.95rem;
+            opacity: 0.9;
+        }
+
+        .live-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: white;
+            color: var(--f1-red);
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-weight: 700;
+            font-size: 0.85rem;
+        }
+
+        .live-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--f1-red);
+            border-radius: 50%;
+            animation: pulse 1.5s infinite;
+        }
+
+        /* WEATHER BAR */
+        .weather-bar {
+            background: var(--header-bg);
+            padding: 12px 30px;
+            display: flex;
+            justify-content: space-around;
+            border-bottom: 2px solid var(--border-color);
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .weather-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.9rem;
+        }
+
+        .weather-icon {
+            font-size: 1.3rem;
+        }
+
+        .weather-label {
+            color: var(--text-secondary);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+        }
+
+        .weather-value {
+            font-weight: 700;
+            min-width: 60px;
+        }
+
+        /* MAIN LAYOUT */
+        .main-layout {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 0;
+            min-height: calc(100vh - 140px);
+        }
+
+        @media (max-width: 1200px) {
+            .main-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* TIMING TABLE */
+        .timing-container {
+            background: var(--card-bg);
+            overflow-x: auto;
+        }
+
+        .timing-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        .timing-table thead {
+            background: var(--header-bg);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .timing-table th {
+            padding: 15px 10px;
+            text-align: left;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            border-bottom: 2px solid var(--f1-red);
+            font-size: 0.8rem;
+            white-space: nowrap;
+        }
+
+        .timing-table td {
+            padding: 12px 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .timing-table tr {
+            transition: background 0.2s;
+        }
+
+        .timing-table tr:hover {
+            background: rgba(225, 6, 0, 0.15);
+        }
+
+        .pos-col {
+            font-weight: 700;
+            font-size: 1.1rem;
+            width: 50px;
+            color: var(--f1-red);
+            text-align: center;
+        }
+
+        .driver-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 200px;
+        }
+
+        .team-line {
+            width: 4px;
+            height: 35px;
+            border-radius: 2px;
+        }
+
+        .driver-details {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .driver-number {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+
+        .driver-name {
+            font-weight: 700;
+            font-size: 0.95rem;
+        }
+
+        .team-name {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .laps-col {
+            text-align: center;
+            font-weight: 600;
+            width: 60px;
+        }
+
+        .gap-col {
+            font-family: 'Courier New', monospace;
+            font-weight: 700;
+            width: 120px;
+        }
+
+        .gap-leader {
+            color: var(--text-secondary);
+        }
+
+        .gap-positive {
+            color: #4cd964;
+        }
+
+        .interval-col {
+            font-family: 'Courier New', monospace;
+            font-weight: 700;
+            width: 100px;
+            color: var(--text-secondary);
+        }
+
+        .best-lap {
+            font-family: 'Courier New', monospace;
+            font-weight: 700;
+            width: 100px;
+        }
+
+        .sectors-display {
+            display: flex;
+            gap: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+        }
+
+        .sector-time {
+            padding: 3px 6px;
+            border-radius: 3px;
+            background: rgba(255,255,255,0.05);
+            min-width: 55px;
+            text-align: center;
+        }
+
+        .sector-pb {
+            color: var(--sector-purple);
+            font-weight: 700;
+            background: var(--purple-bg);
+        }
+
+        .sector-personal {
+            color: var(--sector-green);
+            background: var(--green-bg);
+        }
+
+        .tire-compound {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-align: center;
+            min-width: 40px;
+        }
+
+        .tire-soft {
+            background: #da291c;
+            color: white;
+        }
+
+        .tire-medium {
+            background: #ffd700;
+            color: black;
+        }
+
+        .tire-hard {
+            background: #ffffff;
+            color: black;
+        }
+
+        .tire-inter {
+            background: #00ff87;
+            color: black;
+        }
+
+        .tire-wet {
+            background: #0093d0;
+            color: white;
+        }
+
+        /* SIDEBAR */
+        .sidebar {
+            background: var(--header-bg);
+            border-left: 2px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .sidebar-section {
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .sidebar-header {
+            background: var(--card-bg);
+            padding: 12px 20px;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            border-bottom: 2px solid var(--f1-red);
+        }
+
+        .sidebar-content {
+            padding: 15px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        /* RACE CONTROL */
+        .race-control-list {
+            max-height: 250px;
+            overflow-y: auto;
+        }
+
+        .rc-item {
+            padding: 10px;
+            margin-bottom: 8px;
+            background: rgba(255,255,255,0.03);
+            border-left: 3px solid var(--f1-red);
+            border-radius: 0 4px 4px 0;
+            font-size: 0.85rem;
+        }
+
+        .rc-lap {
+            font-weight: 700;
+            color: var(--f1-red);
+            margin-right: 8px;
+        }
+
+        .rc-time {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            float: right;
+        }
+
+        /* CHAT */
+        .chat-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 400px;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+            background: rgba(0,0,0,0.2);
+            max-height: 400px;
+        }
+
+        .chat-item {
+            margin-bottom: 12px;
+            padding: 10px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 6px;
+            animation: slideIn 0.3s ease;
+        }
+
+        .chat-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+
+        .chat-username {
+            font-weight: 700;
+            color: var(--f1-red);
+            font-size: 0.85rem;
+        }
+
+        .chat-timestamp {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .chat-message {
+            font-size: 0.9rem;
+            line-height: 1.4;
+            word-wrap: break-word;
+        }
+
+        .chat-input-area {
+            padding: 15px;
+            background: var(--card-bg);
+            display: flex;
+            gap: 10px;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            background: var(--dark-bg);
+            color: white;
+            border-radius: 4px;
+            font-family: inherit;
+            font-size: 0.9rem;
+        }
+
+        .chat-input:focus {
+            outline: none;
+            border-color: var(--f1-red);
+        }
+
+        .chat-send {
+            padding: 10px 20px;
+            background: var(--f1-red);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-weight: 700;
+            cursor: pointer;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+        }
+
+        .chat-send:hover {
+            background: #ff1a1a;
+        }
+
+        /* ANIMATIONS */
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(0.95); }
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* LOADING */
+        .loading-state {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-secondary);
+        }
+
+        .spinner {
+            border: 3px solid var(--border-color);
+            border-top: 3px solid var(--f1-red);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* SCROLLBAR */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--dark-bg);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--f1-red);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #ff1a1a;
+        }
+
+        .last-update {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            background: var(--card-bg);
+            padding: 8px 15px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+        }
+    </style>
+</head>
+<body>
+    <!-- TOP HEADER -->
+    <div class="top-header">
+        <div class="logo">F1 ULTRA</div>
+        <div class="session-header">
+            <div class="session-name" id="session-name">Cargando sesión...</div>
+            <div class="session-circuit" id="circuit-name">Circuito</div>
+        </div>
+        <div class="live-indicator">
+            <div class="live-dot"></div>
+            <span>EN VIVO</span>
+        </div>
+    </div>
+
+    <!-- WEATHER BAR -->
+    <div class="weather-bar">
+        <div class="weather-item">
+            <span class="weather-icon">🌡️</span>
+            <div>
+                <div class="weather-label">Aire</div>
+                <div class="weather-value" id="air-temp">--°C</div>
+            </div>
+        </div>
+        <div class="weather-item">
+            <span class="weather-icon"></span>
+            <div>
+                <div class="weather-label">Pista</div>
+                <div class="weather-value" id="track-temp">--°C</div>
+            </div>
+        </div>
+        <div class="weather-item">
+            <span class="weather-icon">💧</span>
+            <div>
+                <div class="weather-label">Humedad</div>
+                <div class="weather-value" id="humidity">--%</div>
+            </div>
+        </div>
+        <div class="weather-item">
+            <span class="weather-icon">💨</span>
+            <div>
+                <div class="weather-label">Viento</div>
+                <div class="weather-value" id="wind-speed">-- m/s</div>
+            </div>
+        </div>
+        <div class="weather-item">
+            <span class="weather-icon">🏁</span>
+            <div>
+                <div class="weather-label">Vuelta</div>
+                <div class="weather-value" id="current-lap">--/--</div>
+            </div>
+        </div>
+        <div class="weather-item">
+            <span class="weather-icon">⏱️</span>
+            <div>
+                <div class="weather-label">Tiempo</div>
+                <div class="weather-value" id="session-time">--:--</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN LAYOUT -->
+    <div class="main-layout">
+        <!-- TIMING TABLE -->
+        <div class="timing-container">
+            <table class="timing-table">
+                <thead>
+                    <tr>
+                        <th>Pos</th>
+                        <th>Piloto</th>
+                        <th>Vueltas</th>
+                        <th>Gap</th>
+                        <th>Intervalo</th>
+                        <th>Mejor Vuelta</th>
+                        <th>Sectores</th>
+                        <th>Neumático</th>
+                    </tr>
+                </thead>
+                <tbody id="timing-body">
+                    <tr>
+                        <td colspan="8" class="loading-state">
+                            <div class="spinner"></div>
+                            <div>Conectando con OpenF1 API...</div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- SIDEBAR -->
+        <div class="sidebar">
+            <!-- RACE CONTROL -->
+            <div class="sidebar-section">
+                <div class="sidebar-header">🏁 Race Control</div>
+                <div class="sidebar-content race-control-list" id="race-control">
+                    <div class="loading-state">Cargando mensajes...</div>
+                </div>
+            </div>
+
+            <!-- CHAT -->
+            <div class="sidebar-section chat-section" style="flex: 1;">
+                <div class="sidebar-header">💬 Pit Wall Chat</div>
+                <div class="chat-messages" id="chat-messages">
+                    <div class="loading-state">Conectando chat...</div>
+                </div>
+                <div class="chat-input-area">
+                    <input type="text" class="chat-input" id="chat-username" placeholder="Tu nombre" maxlength="15">
+                    <input type="text" class="chat-input" id="chat-text" placeholder="Escribe un mensaje..." maxlength="200">
+                    <button class="chat-send" onclick="sendChat()">Enviar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="last-update" id="last-update">Actualizado: --:--:--</div>
+
+    <!-- FIREBASE SDK -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+        import { getDatabase, ref, push, onChildAdded, query, limitToLast } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
+
+        // ⚠️ REEMPLAZA ESTO CON TU CONFIGURACIÓN DE FIREBASE
+        const firebaseConfig = {
+            apiKey: "TU_API_KEY_AQUI",
+            authDomain: "TU_PROYECTO.firebaseapp.com",
+            databaseURL: "https://TU_PROYECTO-default-rtdb.firebaseio.com",
+            projectId: "TU_PROYECTO",
+            storageBucket: "TU_PROYECTO.appspot.com",
+            messagingSenderId: "123456789",
+            appId: "1:123456789:web:abc123"
+        };
+
+        // Inicializar Firebase
+        let db;
+        try {
+            const app = initializeApp(firebaseConfig);
+            db = getDatabase(app);
+            setupChat();
+        } catch (error) {
+            console.error("Firebase no configurado:", error);
+        }
+
+        function setupChat() {
+            const messagesRef = ref(db, 'messages');
+            const q = query(messagesRef, limitToLast(50));
+            
+            onChildAdded(q, (snapshot) => {
+                const data = snapshot.val();
+                addChatMessage(data.user, data.text, data.time);
+            });
+        }
+
+        window.sendChat = async function() {
+            if (!db) {
+                alert("Firebase no está configurado. Configura tu API key primero.");
+                return;
+            }
+
+            const userIn = document.getElementById('chat-username');
+            const textIn = document.getElementById('chat-text');
+            const user = userIn.value.trim() || 'Anónimo';
+            const text = textIn.value.trim();
+            
+            if (!text) return;
+
+            try {
+                await push(ref(db, 'messages'), {
+                    user: user,
+                    text: text,
+                    time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+                });
+                textIn.value = '';
+                userIn.value = user;
+            } catch (error) {
+                console.error("Error enviando mensaje:", error);
+            }
+        }
+
+        function addChatMessage(user, text, time) {
+            const container = document.getElementById('chat-messages');
+            if (container.children[0]?.classList.contains('loading-state')) {
+                container.innerHTML = '';
+            }
+            
+            const msg = document.createElement('div');
+            msg.className = 'chat-item';
+            msg.innerHTML = `
+                <div class="chat-header">
+                    <span class="chat-username">${escapeHtml(user)}</span>
+                    <span class="chat-timestamp">${time}</span>
+                </div>
+                <div class="chat-message">${escapeHtml(text)}</div>
+            `;
+            container.appendChild(msg);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
+
+    <!-- F1 DATA API -->
+    <script>
+        const API_BASE = "https://api.openf1.org/v1";
+        let currentSessionKey = null;
+        let teamColors = {};
+
+        // Colores de equipos
+        const TEAM_COLORS = {
+            'Red Bull': '#061D42',
+            'Ferrari': '#DC0000',
+            'Mercedes': '#00D2BE',
+            'McLaren': '#FF8700',
+            'Aston Martin': '#006F62',
+            'Alpine': '#0090FF',
+            'Williams': '#005AFF',
+            'RB': '#1634CB',
+            'Sauber': '#52E252',
+            'Haas': '#B6BABD'
+        };
+
+        // Compuestos de neumáticos
+        const TIRE_COMPOUNDS = {
+            'soft': { class: 'tire-soft', label: 'S' },
+            'medium': { class: 'tire-medium', label: 'M' },
+            'hard': { class: 'tire-hard', label: 'H' },
+            'intermediate': { class: 'tire-inter', label: 'I' },
+            'wet': { class: 'tire-wet', label: 'W' },
+            'unknown': { class: 'tire-hard', label: '?' }
+        };
+
+        async function fetchSession() {
+            try {
+                const today = new Date().toISOString().split('T')[0];
+                const response = await fetch(`${API_BASE}/sessions?date>=${today}`);
+                const sessions = await response.json();
+                
+                if (sessions.length > 0) {
+                    const session = sessions[sessions.length - 1];
+                    currentSessionKey = session.session_key;
+                    
+                    document.getElementById('session-name').textContent = 
+                        `${session.session_name || 'Sesión F1'}`;
+                    document.getElementById('circuit-name').textContent = 
+                        `${session.country_name || ''} - ${session.circuit_name || ''}`;
+                    
+                    // Fetch all data
+                    fetchWeather();
+                    fetchTiming();
+                    fetchRaceControl();
+                } else {
+                    document.getElementById('session-name').textContent = "Sin sesión activa";
+                }
+            } catch (error) {
+                console.error('Error fetching session:', error);
+            }
+        }
+
+        async function fetchWeather() {
+            try {
+                const response = await fetch(`${API_BASE}/weather?session_key=${currentSessionKey}`);
+                const data = await response.json();
+                
+                if (data.length > 0) {
+                    const w = data[data.length - 1];
+                    document.getElementById('air-temp').textContent = `${Math.round(w.air_temperature || 20)}°C`;
+                    document.getElementById('track-temp').textContent = `${Math.round(w.track_temperature || 25)}°C`;
+                    document.getElementById('humidity').textContent = `${Math.round(w.humidity || 50)}%`;
+                    document.getElementById('wind-speed').textContent = `${(w.wind_speed || 0).toFixed(1)} m/s`;
+                }
+            } catch (error) {
+                console.error('Error weather:', error);
+            }
+        }
+
+        async function fetchTiming() {
+            try {
+                const response = await fetch(`${API_BASE}/timing?session_key=${currentSessionKey}`);
+                const data = await response.json();
+                
+                if (data.length === 0) return;
+                
+                // Get latest timing data for each driver
+                const latestTiming = {};
+                data.forEach(entry => {
+                    if (!latestTiming[entry.driver_number] || 
+                        new Date(entry.date) > new Date(latestTiming[entry.driver_number].date)) {
+                        latestTiming[entry.driver_number] = entry;
+                    }
+                });
+                
+                const drivers = Object.values(latestTiming).sort((a, b) => 
+                    (a.position || 99) - (b.position || 99)
+                );
+                
+                renderTimingTable(drivers);
+                
+                // Update lap counter
+                const maxLap = Math.max(...drivers.map(d => d.laps_completed || 0));
+                const totalLaps = 58; // Default, could be fetched from session
+                document.getElementById('current-lap').textContent = `${maxLap}/${totalLaps}`;
+                
+                // Update timestamp
+                const now = new Date();
+                document.getElementById('last-update').textContent = 
+                    `Actualizado: ${now.toLocaleTimeString()}`;
+                    
+            } catch (error) {
+                console.error('Error timing:', error);
+            }
+        }
+
+        function renderTimingTable(drivers) {
+            const tbody = document.getElementById('timing-body');
+            tbody.innerHTML = '';
+
+            drivers.forEach((driver, index) => {
+                // Get team color
+                let color = '#555';
+                for (const [team, c] of Object.entries(TEAM_COLORS)) {
+                    if (driver.team_name?.includes(team)) {
+                        color = c;
+                        break;
+                    }
+                }
+
+                // Gap formatting
+                let gapHtml = '<span class="gap-leader">Liderando</span>';
+                if (driver.gap_to_leader && driver.gap_to_leader > 0) {
+                    const gapSec = driver.gap_to_leader;
+                    gapHtml = `<span class="gap-positive">+${gapSec.toFixed(3)}s</span>`;
+                } else if (driver.interval_to_leader_ahead) {
+                    gapHtml = `<span class="gap-positive">+${driver.interval_to_leader_ahead.toFixed(3)}s</span>`;
+                }
+
+                // Interval
+                const interval = driver.interval_to_car_ahead ? 
+                    `+${driver.interval_to_car_ahead.toFixed(3)}s` : '-';
+
+                // Best lap
+                const bestLap = driver.best_lap_time ? 
+                    formatTime(driver.best_lap_time) : '--:--.---';
+
+                // Sectors
+                const sectors = driver.sectors ? `
+                    <div class="sectors-display">
+                        <span class="sector-time">${driver.sectors[0] ? driver.sectors[0].toFixed(3) : '--'}</span>
+                        <span class="sector-time">${driver.sectors[1] ? driver.sectors[1].toFixed(3) : '--'}</span>
+                        <span class="sector-time">${driver.sectors[2] ? driver.sectors[2].toFixed(3) : '--'}</span>
+                    </div>
+                ` : '<span>--</span>';
+
+                // Tire compound
+                const tireClass = TIRE_COMPOUNDS[driver.tire_compound?.toLowerCase()] || TIRE_COMPOUNDS.unknown;
+
+                const row = `
+                    <tr>
+                        <td class="pos-col">${driver.position || index + 1}</td>
+                        <td>
+                            <div class="driver-info">
+                                <div class="team-line" style="background: ${color}"></div>
+                                <div class="driver-details">
+                                    <div class="driver-number">#${driver.driver_number || '?'}</div>
+                                    <div class="driver-name">${driver.driver_name || driver.driver_full_name || 'Desconocido'}</div>
+                                    <div class="team-name">${driver.team_name || 'Equipo'}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="laps-col">${driver.laps_completed || 0}</td>
+                        <td class="gap-col">${gapHtml}</td>
+                        <td class="interval-col">${interval}</td>
+                        <td class="best-lap">${bestLap}</td>
+                        <td>${sectors}</td>
+                        <td><span class="tire-compound ${tireClass.class}">${tireClass.label}</span></td>
+                    </tr>
+                `;
+                tbody.innerHTML += row;
+            });
+        }
+
+        function formatTime(seconds) {
+            if (!seconds) return '--:--.---';
+            const mins = Math.floor(seconds / 60);
+            const secs = (seconds % 60).toFixed(3);
+            return `${mins}:${secs.padStart(6, '0')}`;
+        }
+
+        async function fetchRaceControl() {
+            try {
+                const response = await fetch(`${API_BASE}/race_control?session_key=${currentSessionKey}`);
+                const data = await response.json();
+                
+                if (data.length > 0) {
+                    const container = document.getElementById('race-control');
+                    container.innerHTML = '';
+                    
+                    const latest = data.slice(-20).reverse();
+                    latest.forEach(msg => {
+                        const div = document.createElement('div');
+                        div.className = 'rc-item';
+                        const time = msg.date ? new Date(msg.date).toLocaleTimeString() : '--:--';
+                        div.innerHTML = `
+                            <span class="rc-lap">L${msg.lap || '--'}</span>
+                            <span>${msg.message || msg.flag || 'Mensaje'}</span>
+                            <span class="rc-time">${time}</span>
+                        `;
+                        container.appendChild(div);
+                    });
+                }
+            } catch (error) {
+                console.error('Error race control:', error);
+            }
+        }
+
+        // Initialize
+        fetchSession();
+        
+        // Auto-refresh
+        setInterval(fetchTiming, 5000);      // Every 5 seconds
+        setInterval(fetchWeather, 30000);     // Every 30 seconds
+        setInterval(fetchRaceControl, 15000); // Every 15 seconds
+        setInterval(fetchSession, 60000);     // Every minute
+    </script>
+</body>
+</html>
