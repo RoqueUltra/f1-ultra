@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>F1 Ultra - Temporada 2026</title>
+    <title>F1 Ultra - Live Timing</title>
     <link href="https://fonts.googleapis.com/css2?family=Titillium+Web:wght@300;400;600;700;900&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -65,7 +65,7 @@
             font-family: inherit;
             font-size: 0.9rem;
             cursor: pointer;
-            max-width: 350px;
+            max-width: 400px;
             font-weight: 600;
         }
 
@@ -90,8 +90,12 @@
         .live-dot {
             width: 8px;
             height: 8px;
-            background: var(--f1-red);
+            background: #666;
             border-radius: 50%;
+        }
+
+        .live-dot.active {
+            background: var(--f1-red);
             animation: pulse 1.5s infinite;
         }
 
@@ -250,10 +254,7 @@
         .gap-positive { color: #4cd964; font-family: monospace; font-weight: 700; }
         .gap-leader { color: var(--text-secondary); font-family: monospace; }
 
-        .best-lap {
-            font-family: monospace;
-            font-weight: 700;
-        }
+        .best-lap { font-family: monospace; font-weight: 700; }
 
         .sectors-display {
             display: flex;
@@ -450,22 +451,22 @@
         <div class="logo">F1 ULTRA</div>
         
         <div class="session-selector">
-            <label for="gp-select">🏁 Temporada 2026:</label>
+            <label for="gp-select">🏁 Temporada:</label>
             <select id="gp-select" onchange="loadSelectedSession()">
-                <option value="">Cargando carreras...</option>
+                <option value="">⏳ Cargando sesiones...</option>
             </select>
         </div>
 
         <div class="live-indicator">
-            <div class="live-dot"></div>
-            <span id="live-status">2026</span>
+            <div class="live-dot" id="live-dot"></div>
+            <span id="live-status">Cargando...</span>
         </div>
     </div>
 
     <!-- SESSION INFO -->
     <div class="session-info-bar">
         <div class="session-details">
-            <div class="circuit-name" id="circuit-name">Selecciona una carrera</div>
+            <div class="circuit-name" id="circuit-name">Selecciona una sesión</div>
             <div class="session-meta" id="session-date">--</div>
         </div>
         <div class="session-type" id="session-type">--</div>
@@ -530,7 +531,7 @@
                     <tr>
                         <td colspan="7" class="loading-state">
                             <div class="spinner"></div>
-                            <div>Selecciona un Gran Premio para ver los datos</div>
+                            <div>Selecciona una sesión para ver los datos</div>
                         </td>
                     </tr>
                 </tbody>
@@ -657,6 +658,9 @@
         const API_BASE = "https://api.openf1.org/v1";
         let currentSessionKey = null;
         let allSessions = [];
+        let timingInterval = null;
+        let weatherInterval = null;
+        let rcInterval = null;
 
         const TEAM_COLORS = {
             'Red Bull': '#061D42',
@@ -671,65 +675,134 @@
             'Haas': '#B6BABD'
         };
 
-        // Cargar todas las sesiones de 2026
+        // Cargar todas las sesiones
         async function loadSessions() {
             try {
                 const select = document.getElementById('gp-select');
-                select.innerHTML = '<option value="">Cargando...</option>';
+                select.innerHTML = '<option value="">⏳ Cargando...</option>';
                 
-                // Cargar sesiones de 2026
-                const response = await fetch(`${API_BASE}/sessions?year=2026`);
-                const sessions = await response.json();
+                // Intentar 2026 primero
+                let response = await fetch(`${API_BASE}/sessions?year=2026`);
+                let sessions = await response.json();
                 
+                let displayYear = 2026;
+                
+                // Si no hay datos de 2026, usar 2024
                 if (sessions.length === 0) {
-                    select.innerHTML = '<option value="">No hay datos de 2026 disponibles</option>';
-                    return;
+                    console.log('⚠️ No hay datos de 2026, usando 2024...');
+                    response = await fetch(`${API_BASE}/sessions?year=2024`);
+                    sessions = await response.json();
+                    displayYear = 2024;
+                    
+                    if (sessions.length === 0) {
+                        select.innerHTML = '<option value="">❌ No hay datos disponibles</option>';
+                        return;
+                    }
                 }
                 
                 allSessions = sessions;
                 
-                // Filtrar solo carreras (Race)
-                const races = sessions.filter(s => 
-                    s.session_name?.includes('Race') || 
-                    s.session_name?.includes('Carrera')
-                ).sort((a, b) => new Date(a.date_start) - new Date(b.date_start));
+                // Agrupar por circuito
+                const grouped = {};
+                
+                sessions.forEach(session => {
+                    const circuit = session.circuit_name || session.country_name || 'Unknown';
+                    if (!grouped[circuit]) {
+                        grouped[circuit] = [];
+                    }
+                    grouped[circuit].push(session);
+                });
                 
                 // Llenar selector
-                select.innerHTML = '<option value="">🏁 Selecciona un Gran Premio</option>';
+                select.innerHTML = `<option value="">🏁 Temporada ${displayYear} - Selecciona sesión</option>`;
                 
-                races.forEach(session => {
-                    const option = document.createElement('option');
-                    const flag = getCountryFlag(session.country_code);
-                    option.value = session.session_key;
-                    option.textContent = `${flag} ${session.country_name || session.circuit_name} - ${formatDate(session.date_start)}`;
-                    option.dataset.date = session.date_start;
-                    option.dataset.type = session.session_name;
-                    option.dataset.circuit = session.circuit_name;
-                    option.dataset.country = session.country_name;
-                    select.appendChild(option);
+                Object.keys(grouped).sort().forEach(circuit => {
+                    const circuitSessions = grouped[circuit].sort((a, b) => 
+                        new Date(a.date_start) - new Date(b.date_start)
+                    );
+                    
+                    // Grupo (desabilitado)
+                    const groupOption = document.createElement('option');
+                    groupOption.disabled = true;
+                    groupOption.textContent = `─── ${circuit} ───`;
+                    select.appendChild(groupOption);
+                    
+                    // Cada sesión
+                    circuitSessions.forEach(session => {
+                        const option = document.createElement('option');
+                        const flag = getCountryFlag(session.country_code);
+                        const sessionLabel = formatSessionName(session.session_name);
+                        const date = formatDate(session.date_start);
+                        
+                        option.value = session.session_key;
+                        option.textContent = `   ${sessionLabel} - ${date}`;
+                        option.dataset.date = session.date_start;
+                        option.dataset.type = session.session_name;
+                        option.dataset.circuit = circuit;
+                        option.dataset.country = session.country_name;
+                        option.dataset.session_key = session.session_key;
+                        
+                        select.appendChild(option);
+                    });
+                    
+                    // Espacio
+                    const spacer = document.createElement('option');
+                    spacer.disabled = true;
+                    spacer.textContent = '';
+                    select.appendChild(spacer);
                 });
-
-                // Seleccionar automáticamente la última carrera disponible
-                if (races.length > 0) {
-                    const lastRace = races[races.length - 1];
+                
+                // Seleccionar última carrera automáticamente
+                const raceSessions = sessions.filter(s => 
+                    s.session_name?.includes('Race') || s.session_name?.includes('Carrera')
+                );
+                
+                if (raceSessions.length > 0) {
+                    const lastRace = raceSessions.sort((a, b) => 
+                        new Date(b.date_start) - new Date(a.date_start)
+                    )[0];
                     select.value = lastRace.session_key;
-                    loadSelectedSession();
+                    await loadSelectedSession();
                 }
                 
             } catch (error) {
                 console.error('Error loading sessions:', error);
                 document.getElementById('gp-select').innerHTML = 
-                    '<option value="">❌ Error de conexión</option>';
+                    '<option value="">❌ Error: ' + error.message + '</option>';
             }
+        }
+
+        function formatSessionName(sessionName) {
+            if (!sessionName) return 'Sesión';
+            
+            const mappings = {
+                'Practice 1': '🔵 Práctica 1',
+                'Practice 2': '🔵 Práctica 2',
+                'Practice 3': '🔵 Práctica 3',
+                'Qualifying': '🟣 Clasificación',
+                'Sprint Qualifying': '🟣 Sprint Shootout',
+                'Sprint': '🏁 Sprint',
+                'Race': '🏁 Carrera',
+                'Carrera': '🏁 Carrera',
+                'Clasificación': '🟣 Clasificación'
+            };
+            
+            for (const [key, label] of Object.entries(mappings)) {
+                if (sessionName.includes(key)) {
+                    return label;
+                }
+            }
+            
+            return sessionName;
         }
 
         function getCountryFlag(code) {
             const flags = {
                 'BHR': '🇧', 'SAU': '🇸🇦', 'AUS': '🇦🇺', 'JPN': '🇯🇵',
                 'CHN': '🇨', 'MIA': '🇸', 'ITA': '🇮🇹', 'MON': '🇲🇨',
-                'CAN': '🇨🇦', 'ESP': '🇪🇸', 'AUT': '🇦', 'GBR': '🇬🇧',
+                'CAN': '🇨', 'ESP': '🇸', 'AUT': '🇦', 'GBR': '🇬🇧',
                 'HUN': '🇭🇺', 'BEL': '🇧🇪', 'NED': '🇳', 'SIN': '🇬',
-                'USA': '🇺', 'MEX': '🇽', 'BRA': '🇧🇷', 'LVG': '🇺🇸',
+                'USA': '🇺', 'MEX': '🇽', 'BRA': '🇧🇷', 'LVG': '🇺',
                 'QAT': '🇶🇦', 'UAE': '🇦🇪'
             };
             return flags[code] || '🏁';
@@ -746,27 +819,62 @@
             const select = document.getElementById('gp-select');
             const selectedOption = select.options[select.selectedIndex];
             
-            if (!select.value) {
+            if (!select.value || !selectedOption.dataset.session_key) {
                 document.getElementById('timing-body').innerHTML = `
-                    <tr><td colspan="7" class="loading-state">Selecciona un Gran Premio</td></tr>
+                    <tr><td colspan="7" class="loading-state">Selecciona una sesión</td></tr>
                 `;
                 return;
             }
 
-            currentSessionKey = select.value;
+            currentSessionKey = selectedOption.dataset.session_key;
             
-            // Actualizar información
+            // Actualizar UI
+            const sessionType = selectedOption.dataset.type || '';
+            const formattedType = formatSessionName(sessionType);
+            const sessionDate = new Date(selectedOption.dataset.date);
+            const now = new Date();
+            
             document.getElementById('circuit-name').textContent = 
                 `${selectedOption.dataset.circuit || '--'}`;
             document.getElementById('session-date').textContent = 
                 `${selectedOption.dataset.country || ''} - ${selectedOption.dataset.date || '--'}`;
-            document.getElementById('session-type').textContent = 
-                selectedOption.dataset.type || '--';
-
+            document.getElementById('session-type').textContent = formattedType;
+            
+            // Determinar si es EN VIVO o HISTÓRICO
+            const timeDiff = now - sessionDate;
+            const hoursDiff = timeDiff / (1000 * 60 * 60);
+            
+            const liveIndicator = document.getElementById('live-status');
+            const liveDot = document.getElementById('live-dot');
+            
+            // Limpiar intervals anteriores
+            if (timingInterval) clearInterval(timingInterval);
+            if (weatherInterval) clearInterval(weatherInterval);
+            if (rcInterval) clearInterval(rcInterval);
+            
+            if (hoursDiff < 3 && hoursDiff > -1) {
+                // EN VIVO - sesión ocurriendo ahora
+                liveIndicator.textContent = 'EN VIVO';
+                liveDot.classList.add('active');
+                
+                // Auto-refresh
+                timingInterval = setInterval(fetchTiming, 5000);
+                weatherInterval = setInterval(fetchWeather, 30000);
+                rcInterval = setInterval(fetchRaceControl, 10000);
+                
+            } else {
+                // HISTÓRICO
+                const daysAgo = Math.floor(hoursDiff / 24);
+                liveIndicator.textContent = daysAgo >= 1 ? `HISTÓRICO (${daysAgo} días)` : 'HISTÓRICO';
+                liveDot.classList.remove('active');
+            }
+            
             // Cargar datos
-            fetchWeather();
-            fetchTiming();
-            fetchRaceControl();
+            await Promise.all([
+                fetchWeather(),
+                fetchTiming(),
+                fetchRaceControl()
+            ]);
         }
 
         async function fetchWeather() {
@@ -789,11 +897,29 @@
         async function fetchTiming() {
             try {
                 const response = await fetch(`${API_BASE}/timing?session_key=${currentSessionKey}`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
                 const data = await response.json();
+                
+                // Verificar que data sea un array
+                if (!Array.isArray(data)) {
+                    console.error('Data no es un array:', data);
+                    throw new Error('Formato de datos inválido');
+                }
                 
                 if (data.length === 0) {
                     document.getElementById('timing-body').innerHTML = `
-                        <tr><td colspan="7" class="loading-state">No hay datos de timing disponibles para esta sesión</td></tr>
+                        <tr>
+                            <td colspan="7" class="loading-state">
+                                ⚠️ No hay datos de timing disponibles<br>
+                                <small style="color: var(--text-secondary);">
+                                    Intenta seleccionar otra sesión
+                                </small>
+                            </td>
+                        </tr>
                     `;
                     return;
                 }
@@ -823,7 +949,14 @@
             } catch (error) {
                 console.error('Error timing:', error);
                 document.getElementById('timing-body').innerHTML = `
-                    <tr><td colspan="7" class="loading-state">Error cargando datos de timing</td></tr>
+                    <tr>
+                        <td colspan="7" class="loading-state">
+                            ❌ Error: ${error.message}<br><br>
+                            <small style="color: var(--text-secondary);">
+                                💡 La API no tiene datos para esta sesión
+                            </small>
+                        </td>
+                    </tr>
                 `;
             }
         }
@@ -844,8 +977,6 @@
                 let gapHtml = '<span class="gap-leader">Liderando</span>';
                 if (driver.gap_to_leader && driver.gap_to_leader > 0) {
                     gapHtml = `<span class="gap-positive">+${driver.gap_to_leader.toFixed(3)}s</span>`;
-                } else if (driver.interval_to_leader_ahead) {
-                    gapHtml = `<span class="gap-positive">+${driver.interval_to_leader_ahead.toFixed(3)}s</span>`;
                 }
 
                 const bestLap = driver.best_lap_time ? 
@@ -853,15 +984,9 @@
 
                 const sectors = driver.sectors ? `
                     <div class="sectors-display">
-                        <span class="sector-time ${driver.sectors[0] < 20 ? 'sector-pb' : ''}">
-                            ${driver.sectors[0]?.toFixed(3) || '--'}
-                        </span>
-                        <span class="sector-time ${driver.sectors[1] < 20 ? 'sector-pb' : ''}">
-                            ${driver.sectors[1]?.toFixed(3) || '--'}
-                        </span>
-                        <span class="sector-time ${driver.sectors[2] < 20 ? 'sector-pb' : ''}">
-                            ${driver.sectors[2]?.toFixed(3) || '--'}
-                        </span>
+                        <span class="sector-time">${driver.sectors[0]?.toFixed(3) || '--'}</span>
+                        <span class="sector-time">${driver.sectors[1]?.toFixed(3) || '--'}</span>
+                        <span class="sector-time">${driver.sectors[2]?.toFixed(3) || '--'}</span>
                     </div>
                 ` : '<span>--</span>';
 
@@ -925,21 +1050,21 @@
                         const time = msg.date ? new Date(msg.date).toLocaleTimeString() : '--:--';
                         div.innerHTML = `
                             <span class="rc-lap">L${msg.lap || '--'}</span>
-                            <span>${msg.message || msg.flag || 'Mensaje de carrera'}</span>
+                            <span>${msg.message || msg.flag || 'Mensaje'}</span>
                             <span class="rc-time">${time}</span>
                         `;
                         container.appendChild(div);
                     });
                 } else {
                     document.getElementById('race-control').innerHTML = 
-                        '<div class="loading-state">Sin mensajes de Race Control</div>';
+                        '<div class="loading-state">Sin mensajes</div>';
                 }
             } catch (error) {
                 console.error('Error race control:', error);
             }
         }
 
-        // Inicializar al cargar la página
+        // Inicializar
         document.addEventListener('DOMContentLoaded', () => {
             loadSessions();
         });
