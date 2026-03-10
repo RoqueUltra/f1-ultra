@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+CTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>F1 Ultra - Live Timing</title>
+    <title>F1 Ultra - Resultados</title>
     <link href="https://fonts.googleapis.com/css2?family=Titillium+Web:wght@300;400;600;700;900&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -16,7 +16,6 @@
             --border-color: #2a2a3e;
             --live-green: #00ff00;
         }
-
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Titillium Web', sans-serif;
@@ -24,7 +23,6 @@
             color: var(--text-primary);
             font-size: 14px;
         }
-
         .top-header {
             background: linear-gradient(135deg, var(--f1-red) 0%, #9e0000 100%);
             padding: 15px 30px;
@@ -34,9 +32,7 @@
             flex-wrap: wrap;
             gap: 15px;
         }
-
         .logo { font-size: 2.2rem; font-weight: 900; font-style: italic; }
-
         .session-selector { display: flex; align-items: center; gap: 15px; flex-wrap: wrap; }
         .session-selector label { font-weight: 700; font-size: 0.9rem; }
         .session-selector select {
@@ -46,50 +42,28 @@
         }
         #year-select { max-width: 100px; border-color: var(--f1-red) !important; }
         #gp-select { max-width: 350px; }
-        #mode-select { max-width: 200px; border-color: var(--live-green) !important; }
-
         .live-indicator {
             display: flex; align-items: center; gap: 8px;
             background: white; color: var(--f1-red);
             padding: 8px 16px; border-radius: 4px;
             font-weight: 700; font-size: 0.85rem;
         }
-
-        .live-dot {
-            width: 10px; height: 10px; border-radius: 50%;
-            background: #666;
-        }
-
-        .live-dot.active {
-            background: var(--live-green);
-            animation: pulse 1s infinite;
-            box-shadow: 0 0 10px var(--live-green);
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.5; transform: scale(0.8); }
-        }
-
         .session-info-bar {
             background: var(--card-bg); padding: 15px 30px;
             display: flex; justify-content: space-between;
             border-bottom: 2px solid var(--f1-red);
         }
-
         .circuit-name { font-size: 1.3rem; font-weight: 700; }
         .session-type {
             background: var(--f1-red); padding: 6px 20px;
             border-radius: 4px; font-weight: 700;
             text-transform: uppercase; font-size: 0.9rem;
         }
-
         .main-layout { 
             display: grid; grid-template-columns: 1fr 400px; gap: 0; 
             min-height: calc(100vh - 180px);
         }
         @media (max-width: 1200px) { .main-layout { grid-template-columns: 1fr; } }
-
         .timing-container { background: var(--card-bg); overflow-x: auto; }
         .timing-table { width: 100%; border-collapse: collapse; }
         .timing-table thead {
@@ -102,7 +76,6 @@
         }
         .timing-table td { padding: 12px 10px; border-bottom: 1px solid var(--border-color); }
         .timing-table tr:hover { background: rgba(225, 6, 0, 0.15); }
-
         .pos-col { font-weight: 700; font-size: 1.1rem; width: 50px; color: var(--f1-red); text-align: center; }
         .driver-info { display: flex; align-items: center; gap: 12px; min-width: 220px; }
         .team-line { width: 4px; height: 35px; border-radius: 2px; }
@@ -113,7 +86,6 @@
         .gap-positive { color: var(--live-green); font-family: monospace; font-weight: 700; }
         .gap-leader { color: var(--text-secondary); font-family: monospace; }
         .best-lap { font-family: monospace; font-weight: 700; }
-        
         .tire-compound {
             display: inline-block; padding: 4px 10px; border-radius: 4px;
             font-size: 0.8rem; font-weight: 700; min-width: 45px; text-align: center;
@@ -121,8 +93,14 @@
         .tire-soft { background: #da291c; color: white; }
         .tire-medium { background: #ffd700; color: black; }
         .tire-hard { background: #ffffff; color: black; }
-
-        .sidebar { background: var(--header-bg); border-left: 2px solid var(--border-color); }
+        
+        /* SIDEBAR */
+        .sidebar { 
+            background: var(--header-bg); 
+            border-left: 2px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+        }
         .sidebar-section { border-bottom: 2px solid var(--border-color); }
         .sidebar-header {
             background: var(--card-bg); padding: 12px 20px; font-weight: 700;
@@ -135,31 +113,61 @@
             font-size: 0.85rem;
         }
         .rc-lap { font-weight: 700; color: var(--f1-red); margin-right: 8px; }
-        .rc-time { font-size: 0.75rem; color: var(--text-secondary); float: right; }
-
+        
+        /* CHAT - CORREGIDO */
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            max-height: 600px;
+        }
         .chat-messages {
-            flex: 1; overflow-y: auto; padding: 15px;
-            background: rgba(0,0,0,0.2); min-height: 300px; max-height: 400px;
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+            background: rgba(0,0,0,0.2);
+            min-height: 300px;
+            margin-bottom: 15px;
         }
         .chat-item {
             margin-bottom: 12px; padding: 10px;
             background: rgba(255,255,255,0.05); border-radius: 6px;
         }
-        .chat-username { font-weight: 700; color: var(--f1-red); font-size: 0.85rem; }
+        .chat-username { font-weight: 700; color: var(--f1-red); font-size: 0.85rem; margin-bottom: 5px; }
         .chat-timestamp { font-size: 0.75rem; color: var(--text-secondary); float: right; }
-
         .chat-input-area {
-            padding: 15px; background: var(--card-bg); display: flex; gap: 10px;
+            padding: 15px;
+            background: var(--card-bg);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            border-top: 2px solid var(--border-color);
+        }
+        .chat-input-row {
+            display: flex;
+            gap: 10px;
         }
         .chat-input {
-            flex: 1; padding: 10px; border: 1px solid var(--border-color);
-            background: var(--dark-bg); color: white; border-radius: 4px;
+            flex: 1;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            background: var(--dark-bg);
+            color: white;
+            border-radius: 4px;
+            font-family: inherit;
         }
         .chat-send {
-            padding: 10px 20px; background: var(--f1-red); color: white;
-            border: none; border-radius: 4px; font-weight: 700; cursor: pointer;
+            padding: 10px 20px;
+            background: var(--f1-red);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-weight: 700;
+            cursor: pointer;
+            white-space: nowrap;
         }
-
+        .chat-send:hover { background: #ff1a1a; }
+        
         .loading-state { text-align: center; padding: 40px; color: var(--text-secondary); }
         .spinner {
             border: 3px solid var(--border-color); border-top: 3px solid var(--f1-red);
@@ -167,27 +175,17 @@
             animation: spin 1s linear infinite; margin: 0 auto 15px;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
         .status-bar {
             position: fixed; bottom: 0; left: 0; right: 0;
             background: var(--header-bg); padding: 10px 30px;
             border-top: 2px solid var(--f1-red);
-            display: flex; justify-content: space-between;
-            font-size: 0.85rem;
+            font-size: 0.85rem; text-align: center;
         }
-
-        .connection-status {
-            display: flex; align-items: center; gap: 8px;
+        .error-message {
+            color: #ff6b6b;
+            text-align: center;
+            padding: 20px;
         }
-
-        .status-dot {
-            width: 8px; height: 8px; border-radius: 50%;
-            background: #666;
-        }
-
-        .status-dot.connected { background: var(--live-green); }
-        .status-dot.disconnected { background: #ff6b6b; }
-
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: var(--dark-bg); }
         ::-webkit-scrollbar-thumb { background: var(--f1-red); border-radius: 4px; }
@@ -197,145 +195,94 @@
     <div class="top-header">
         <div class="logo">F1 ULTRA</div>
         <div class="session-selector">
-            <label for="mode-select">📡 Modo:</label>
-            <select id="mode-select" onchange="changeMode()">
-                <option value="auto">🔄 Auto (En vivo/Histórico)</option>
-                <option value="live">🔴 Forzar En Vivo</option>
-                <option value="historical">📦 Histórico</option>
-            </select>
-
             <label for="year-select">📅 Año:</label>
             <select id="year-select" onchange="changeYear()">
                 <option value="2024">2024</option>
                 <option value="2023">2023</option>
                 <option value="2022">2022</option>
+                <option value="2021">2021</option>
+                <option value="2020">2020</option>
             </select>
-
-            <label for="gp-select">🏁 GP:</label>
+            <label for="gp-select">🏁 Gran Premio:</label>
             <select id="gp-select" onchange="loadSelectedRace()">
                 <option value="">⏳ Cargando...</option>
             </select>
         </div>
-        <div class="live-indicator">
-            <div class="live-dot" id="live-dot"></div>
-            <span id="live-status">Cargando...</span>
-        </div>
+        <div class="live-indicator">📦 HISTÓRICO</div>
     </div>
-
     <div class="session-info-bar">
         <div>
-            <div class="circuit-name" id="circuit-name">Conectando...</div>
+            <div class="circuit-name" id="circuit-name">Selecciona un GP</div>
             <div id="race-date" style="color: var(--text-secondary); font-size: 0.9rem;">--</div>
         </div>
-        <div class="session-type" id="session-type">--</div>
+        <div class="session-type" id="session-type">Carrera</div>
     </div>
-
     <div class="main-layout">
         <div class="timing-container">
             <table class="timing-table">
                 <thead>
                     <tr>
                         <th>Pos</th><th>Piloto</th><th>Equipo</th><th>Vueltas</th>
-                        <th>Gap/Intervalo</th><th>Última Vuelta</th><th>Neumático</th>
+                        <th>Gap/Tiempo</th><th>Puntos</th><th>V. Rápida</th>
                     </tr>
                 </thead>
                 <tbody id="timing-body">
-                    <tr><td colspan="7" class="loading-state"><div class="spinner"></div>Inicializando...</td></tr>
+                    <tr><td colspan="7" class="loading-state"><div class="spinner"></div>Cargando datos...</td></tr>
                 </tbody>
             </table>
         </div>
-
         <div class="sidebar">
             <div class="sidebar-section">
                 <div class="sidebar-header">🏁 Race Control</div>
                 <div class="sidebar-content" id="race-control">
-                    <div class="rc-item"><span class="rc-lap">INFO</span>Esperando datos...</div>
+                    <div class="rc-item"><span class="rc-lap">INFO</span>Datos históricos disponibles</div>
                 </div>
             </div>
-            <div class="sidebar-section">
+            <div class="sidebar-section" style="flex: 1; display: flex; flex-direction: column;">
                 <div class="sidebar-header">💬 Pit Wall Chat</div>
-                <div class="chat-messages" id="chat-messages">
-                    <div class="chat-item"><div class="chat-username">Admin</div><div>Bienvenido a F1 Ultra</div></div>
-                </div>
-                <div class="chat-input-area">
-                    <input type="text" class="chat-input" id="chat-username" placeholder="Nombre" maxlength="15">
-                    <input type="text" class="chat-input" id="chat-text" placeholder="Mensaje..." maxlength="200">
-                    <button class="chat-send" onclick="sendChat()">Enviar</button>
+                <div class="chat-container">
+                    <div class="chat-messages" id="chat-messages">
+                        <div class="chat-item">
+                            <div class="chat-username">Admin</div>
+                            <div class="chat-timestamp">--:--</div>
+                            <div>Bienvenido a F1 Ultra</div>
+                        </div>
+                    </div>
+                    <div class="chat-input-area">
+                        <div class="chat-input-row">
+                            <input type="text" class="chat-input" id="chat-username" placeholder="Tu nombre" maxlength="15">
+                            <input type="text" class="chat-input" id="chat-text" placeholder="Mensaje..." maxlength="200" onkeypress="if(event.key==='Enter')sendChat()">
+                        </div>
+                        <button class="chat-send" onclick="sendChat()" style="width: 100%;">Enviar Mensaje</button>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-
     <div class="status-bar">
-        <div class="connection-status">
-            <div class="status-dot" id="ws-status"></div>
-            <span id="ws-status-text">Desconectado</span>
-        </div>
-        <div id="last-update">Actualizado: --:--:--</div>
-        <div id="delay-info">Delay: --s</div>
+        API: Ergast Database | Datos: 1950-2024 | Actualización: Manual
     </div>
-
-    <script type="module">
-        // Firebase para chat
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
-        import { getDatabase, ref, push, onChildAdded, query, limitToLast } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
-        
-        const firebaseConfig = {
-            apiKey: "TU_API_KEY_AQUI",
-            authDomain: "TU_PROYECTO.firebaseapp.com",
-            databaseURL: "https://TU_PROYECTO-default-rtdb.firebaseio.com",
-            projectId: "TU_PROYECTO",
-            storageBucket: "TU_PROYECTO.appspot.com",
-            messagingSenderId: "123456789",
-            appId: "1:123456789:web:abc123"
-        };
-        
-        let db;
-        try {
-            const app = initializeApp(firebaseConfig);
-            db = getDatabase(app);
-            const q = query(ref(db, 'messages'), limitToLast(50));
-            onChildAdded(q, (s) => {
-                const d = s.val();
-                const c = document.getElementById('chat-messages');
-                if(c.children[0]?.classList.contains('loading-state')) c.innerHTML='';
-                c.innerHTML += `<div class="chat-item"><div class="chat-username">${d.user}</div><div class="chat-timestamp">${d.time}</div><div>${d.text}</div></div>`;
-                c.scrollTop = c.scrollHeight;
-            });
-        } catch(e) { console.log("Firebase no configurado"); }
-        
-        window.sendChat = async function() {
-            if(!db) return alert("Configura Firebase");
-            const u = document.getElementById('chat-username').value||'Anónimo';
-            const t = document.getElementById('chat-text').value.trim();
-            if(!t) return;
-            await push(ref(db,'messages'), {user:u, text:t, time:new Date().toLocaleTimeString()});
-            document.getElementById('chat-text').value='';
-        }
-    </script>
 
     <script>
         const ERGAST_API = "https://ergast.com/api/f1";
-        const F1_LIVE_WS = "wss://livetiming.formula1.com/signalr";
-        
         let currentYear = 2024;
-        let currentMode = 'auto';
-        let ws = null;
-        let wsConnected = false;
-        let liveData = {};
-        let updateInterval = null;
-        let lastUpdateTime = null;
-
+        
         const TEAM_COLORS = {
             'Red Bull': '#061D42', 'Ferrari': '#DC0000', 'Mercedes': '#00D2BE',
             'McLaren': '#FF8700', 'Aston Martin': '#006F62', 'Alpine': '#0090FF',
             'Williams': '#005AFF', 'RB': '#1634CB', 'Sauber': '#52E252', 'Haas': '#B6BABD'
         };
 
-        // Cambiar modo
-        window.changeMode = function() {
-            currentMode = document.getElementById('mode-select').value;
-            updateConnection();
+        // Chat simple
+        window.sendChat = function() {
+            const u = document.getElementById('chat-username').value || 'Anónimo';
+            const t = document.getElementById('chat-text').value.trim();
+            if(!t) return;
+            const c = document.getElementById('chat-messages');
+            const time = new Date().toLocaleTimeString();
+            c.innerHTML += `<div class="chat-item"><div class="chat-username">${u}</div><div class="chat-timestamp">${time}</div><div>${t}</div></div>`;
+            document.getElementById('chat-text').value = '';
+            c.scrollTop = c.scrollHeight;
         }
 
         window.changeYear = function() {
@@ -343,66 +290,105 @@
             loadRaces();
         }
 
-        // Cargar carreras históricas
         async function loadRaces() {
             const select = document.getElementById('gp-select');
-            select.innerHTML = '<option value="">⏳ Cargando...</option>';
+            select.innerHTML = '<option value="">⏳ Cargando carreras...</option>';
             try {
+                console.log('Cargando año:', currentYear);
                 const res = await fetch(`${ERGAST_API}/${currentYear}.json?limit=40`);
+                console.log('Response status:', res.status);
+                
+                if(!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+                
                 const data = await res.json();
-                const races = data.MRData.RaceTable.Races || [];
-                select.innerHTML = '<option value="">🏁 Selecciona un GP</option>';
-                races.forEach(race => {
+                console.log('Data recibida:', data);
+                
+                const races = data.MRData?.RaceTable?.Races || [];
+                console.log('Carreras encontradas:', races.length);
+                
+                if(races.length === 0) {
+                    select.innerHTML = '<option value="">⚠️ No hay carreras para este año</option>';
+                    return;
+                }
+                
+                select.innerHTML = '<option value="">🏁 Selecciona un Gran Premio</option>';
+                races.forEach((race, index) => {
                     const opt = document.createElement('option');
                     opt.value = race.url;
-                    opt.textContent = `${race.raceName} - ${race.date}`;
+                    opt.textContent = `${getFlag(race.Circuit?.Location?.country)} ${race.raceName} - ${race.date}`;
                     opt.dataset.circuit = race.Circuit?.circuitName || '';
                     opt.dataset.date = race.date;
+                    opt.dataset.racename = race.raceName;
                     select.appendChild(opt);
                 });
+                
+                // Seleccionar última carrera automáticamente
+                select.value = races[races.length-1].url;
+                await loadSelectedRace();
+                
             } catch(e) {
-                select.innerHTML = '<option value="">❌ Error</option>';
+                console.error('Error cargando carreras:', e);
+                select.innerHTML = `<option value="">❌ Error: ${e.message}</option>`;
             }
         }
 
         window.loadSelectedRace = async function() {
             const select = document.getElementById('gp-select');
-            if(!select.value) return;
-            
             const opt = select.options[select.selectedIndex];
-            document.getElementById('circuit-name').textContent = opt.dataset.circuit;
-            document.getElementById('race-date').textContent = opt.dataset.date;
+            if(!select.value) {
+                document.getElementById('timing-body').innerHTML = '<tr><td colspan="7" class="loading-state">Selecciona un Gran Premio</td></tr>';
+                return;
+            }
+            
+            document.getElementById('circuit-name').textContent = opt.dataset.circuit || 'Circuito';
+            document.getElementById('race-date').textContent = opt.dataset.date || '';
             document.getElementById('session-type').textContent = 'Carrera';
             
-            if(currentMode === 'historical') {
-                await loadHistoricalResults(select.value);
-            }
+            await loadRaceResults(select.value);
         }
 
-        // Cargar datos históricos
-        async function loadHistoricalResults(url) {
+        async function loadRaceResults(url) {
             const tbody = document.getElementById('timing-body');
-            tbody.innerHTML = '<tr><td colspan="7" class="loading-state"><div class="spinner"></div>Cargando...</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="7" class="loading-state"><div class="spinner"></div>Cargando resultados...</td></tr>';
             try {
+                console.log('Cargando resultados de:', url);
                 const res = await fetch(`${url}/results.json?limit=40`);
+                console.log('Response status:', res.status);
+                
+                if(!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+                
                 const data = await res.json();
-                const results = data.MRData.RaceTable.Races[0]?.Results || [];
-                renderHistoricalTable(results);
-                updateStatus('historical');
+                console.log('Data recibida:', data);
+                
+                const results = data.MRData?.RaceTable?.Races?.[0]?.Results || [];
+                console.log('Resultados encontrados:', results.length);
+                
+                if(results.length === 0) throw new Error('Sin resultados disponibles');
+                
+                renderTable(results);
+                
             } catch(e) {
-                tbody.innerHTML = `<tr><td colspan="7" class="loading-state">❌ Error: ${e.message}</td></tr>`;
+                console.error('Error cargando resultados:', e);
+                tbody.innerHTML = `<tr><td colspan="7" class="error-message">❌ Error: ${e.message}<br><small>Verifica la consola (F12) para más detalles</small></td></tr>`;
             }
         }
 
-        function renderHistoricalTable(results) {
+        function renderTable(results) {
             const tbody = document.getElementById('timing-body');
             tbody.innerHTML = '';
-            results.forEach(r => {
+            
+            results.forEach((r, index) => {
                 let color = '#555';
+                const teamName = r.Constructor?.name || '';
                 for(const [t,c] of Object.entries(TEAM_COLORS)) {
-                    if(r.Constructor?.name?.includes(t)) { color = c; break; }
+                    if(teamName.includes(t)) { color = c; break; }
                 }
-                const gap = r.Time?.gap ? `+${r.Time.gap}` : (r.position==='1' ? 'Liderando' : r.status);
+                
+                const time = r.Time?.time || (r.status !== 'Finished' ? r.status : '+1 Vuelta');
+                const gap = r.Time?.gap ? `+${r.Time.gap}` : (r.position==='1' ? 'Liderando' : '');
+                const fastLap = r.FastestLap?.Time?.time || '--:--.---';
+                const points = r.points || '0';
+                
                 const row = `
                     <tr>
                         <td class="pos-col">${r.position}</td>
@@ -411,233 +397,37 @@
                                 <div class="team-line" style="background:${color}"></div>
                                 <div>
                                     <div class="driver-number">#${r.Driver?.permanentNumber||'--'}</div>
-                                    <div class="driver-name">${r.Driver?.givenName} ${r.Driver?.familyName}</div>
-                                    <div class="team-name">${r.Constructor?.name}</div>
-                                </div>
-                            </div>
-                        </td>
-                        <td>${r.Constructor?.name}</td>
-                        <td class="laps-col">${r.laps}</td>
-                        <td><span class="${gap==='Liderando'?'gap-leader':'gap-positive'}">${gap}</span></td>
-                        <td class="best-lap">--:--.---</td>
-                        <td><span class="tire-compound tire-hard">?</span></td>
-                    </tr>`;
-                tbody.innerHTML += row;
-            });
-            document.getElementById('last-update').textContent = `Actualizado: ${new Date().toLocaleTimeString()}`;
-        }
-
-        // Conectar a F1 Live Timing WebSocket
-        function connectToLiveTiming() {
-            if(ws && ws.readyState === WebSocket.OPEN) return;
-            
-            document.getElementById('ws-status').className = 'status-dot';
-            document.getElementById('ws-status-text').textContent = 'Conectando...';
-            
-            try {
-                ws = new WebSocket(F1_LIVE_WS);
-                
-                ws.onopen = function() {
-                    console.log('✅ WebSocket conectado');
-                    wsConnected = true;
-                    document.getElementById('ws-status').className = 'status-dot connected';
-                    document.getElementById('ws-status-text').textContent = 'Conectado - En Vivo';
-                    document.getElementById('live-dot').classList.add('active');
-                    document.getElementById('live-status').textContent = 'EN VIVO';
-                    
-                    // Suscribirse a timing
-                    subscribeToTiming();
-                };
-                
-                ws.onmessage = function(event) {
-                    try {
-                        const data = JSON.parse(event.data);
-                        processLiveData(data);
-                        lastUpdateTime = new Date();
-                        updateDelay();
-                    } catch(e) {
-                        console.error('Error parsing WS data:', e);
-                    }
-                };
-                
-                ws.onerror = function(error) {
-                    console.error('WebSocket error:', error);
-                    document.getElementById('ws-status').className = 'status-dot disconnected';
-                    document.getElementById('ws-status-text').textContent = 'Error de conexión';
-                };
-                
-                ws.onclose = function() {
-                    console.log('WebSocket cerrado');
-                    wsConnected = false;
-                    document.getElementById('ws-status').className = 'status-dot disconnected';
-                    document.getElementById('ws-status-text').textContent = 'Desconectado';
-                    document.getElementById('live-dot').classList.remove('active');
-                    
-                    // Reintentar en 5 segundos
-                    setTimeout(connectToLiveTiming, 5000);
-                };
-                
-            } catch(e) {
-                console.error('Error creando WebSocket:', e);
-            }
-        }
-
-        function subscribeToTiming() {
-            // Suscribirse a mensajes de timing
-            if(ws && ws.readyState === WebSocket.OPEN) {
-                ws.send(JSON.stringify({
-                    "H": "/liveTiming",
-                    "M": "Subscribe",
-                    "A": ["timing_data"]
-                }));
-            }
-        }
-
-        function processLiveData(data) {
-            // Procesar datos en vivo de F1
-            // La estructura varía según el tipo de mensaje
-            if(data.t) {
-                // Timing data
-                updateLiveTable(data.t);
-            }
-            if(data.rc) {
-                // Race control messages
-                updateRaceControl(data.rc);
-            }
-        }
-
-        function updateLiveTable(timingData) {
-            const tbody = document.getElementById('timing-body');
-            tbody.innerHTML = '';
-            
-            // timingData.Lines contiene los pilotos
-            const lines = timingData.Lines || {};
-            const drivers = Object.values(lines).sort((a,b) => (a.Position||99) - (b.Position||99));
-            
-            drivers.forEach((driver, idx) => {
-                let color = '#555';
-                const teamName = driver.TeamName || '';
-                for(const [t,c] of Object.entries(TEAM_COLORS)) {
-                    if(teamName.includes(t)) { color = c; break; }
-                }
-                
-                const gap = driver.GapToLeader || (driver.Position === 1 ? 'Liderando' : '');
-                const lastLap = driver.LastLapTime || '--:--.---';
-                const tire = driver.Stint?.Compound || 'Unknown';
-                const tireClass = getTireClass(tire);
-                
-                const row = `
-                    <tr>
-                        <td class="pos-col">${driver.Position || idx+1}</td>
-                        <td>
-                            <div class="driver-info">
-                                <div class="team-line" style="background:${color}"></div>
-                                <div>
-                                    <div class="driver-number">#${driver.RacingNumber||'--'}</div>
-                                    <div class="driver-name">${driver.Tla || '---'}</div>
+                                    <div class="driver-name">${r.Driver?.givenName||'Desconocido'} ${r.Driver?.familyName||''}</div>
                                     <div class="team-name">${teamName}</div>
                                 </div>
                             </div>
                         </td>
                         <td>${teamName}</td>
-                        <td class="laps-col">${driver.NumberOfLaps||0}</td>
-                        <td><span class="${gap==='Liderando'?'gap-leader':'gap-positive'}">${gap}</span></td>
-                        <td class="best-lap">${lastLap}</td>
-                        <td><span class="tire-compound ${tireClass}">${tire.substring(0,1).toUpperCase()}</span></td>
+                        <td class="laps-col">${r.laps||0}</td>
+                        <td><span class="${gap==='Liderando'?'gap-leader':'gap-positive'}">${gap || time}</span></td>
+                        <td style="text-align:center;font-weight:700">${points}</td>
+                        <td class="best-lap">${fastLap}</td>
                     </tr>`;
                 tbody.innerHTML += row;
             });
-            
-            document.getElementById('last-update').textContent = `Actualizado: ${new Date().toLocaleTimeString()}`;
         }
 
-        function updateRaceControl(messages) {
-            const container = document.getElementById('race-control');
-            if(!messages || !messages.Messages) return;
-            
-            container.innerHTML = '';
-            const msgs = messages.Messages.slice(-20).reverse();
-            msgs.forEach(msg => {
-                const div = document.createElement('div');
-                div.className = 'rc-item';
-                div.innerHTML = `
-                    <span class="rc-lap">L${msg.Lap||'--'}</span>
-                    <span>${msg.Message||msg.Category||''}</span>
-                    <span class="rc-time">${new Date(msg.Utc).toLocaleTimeString()||''}</span>
-                `;
-                container.appendChild(div);
-            });
-        }
-
-        function getTireClass(compound) {
-            const map = {
-                'SOFT': 'tire-soft',
-                'MEDIUM': 'tire-medium',
-                'HARD': 'tire-hard',
-                'INTERMEDIATE': 'tire-medium',
-                'WET': 'tire-hard'
+        function getFlag(country) {
+            const f = {
+                'Australia':'🇦','Bahrain':'','Saudi Arabia':'🇦','Japan':'🇵',
+                'China':'🇨','USA':'🇺','Monaco':'🇲','Spain':'🇪','Canada':'🇨',
+                'Great Britain':'🇬','Italy':'🇮🇹','Belgium':'🇧🇪','Netherlands':'🇳',
+                'Singapore':'🇬','Mexico':'🇲🇽','Brazil':'🇧','Abu Dhabi':'🇪',
+                'Austria':'🇦','France':'🇫','Hungary':'🇭','Turkey':'🇹',
+                'Germany':'🇩','Malaysia':'🇲','India':'🇮','Korea':'🇰'
             };
-            return map[compound.toUpperCase()] || 'tire-hard';
+            return f[country] || '🏁';
         }
 
-        function updateDelay() {
-            if(!lastUpdateTime) return;
-            const delay = ((new Date() - lastUpdateTime) / 1000).toFixed(1);
-            document.getElementById('delay-info').textContent = `Delay: ${delay}s`;
-        }
-
-        function updateStatus(mode) {
-            const dot = document.getElementById('live-dot');
-            const status = document.getElementById('live-status');
-            if(mode === 'live') {
-                dot.classList.add('active');
-                status.textContent = 'EN VIVO';
-            } else {
-                dot.classList.remove('active');
-                status.textContent = 'HISTÓRICO';
-            }
-        }
-
-        function updateConnection() {
-            // Limpiar intervals
-            if(updateInterval) clearInterval(updateInterval);
-            
-            if(currentMode === 'live' || currentMode === 'auto') {
-                connectToLiveTiming();
-                updateInterval = setInterval(updateDelay, 1000);
-            } else if(currentMode === 'historical') {
-                if(ws) ws.close();
-                const select = document.getElementById('gp-select');
-                if(select.value) loadHistoricalResults(select.value);
-            }
-        }
-
-        // Auto-detectar si hay sesión en vivo
-        async function checkForLiveSession() {
-            try {
-                // Verificar si hay sesión activa hoy
-                const today = new Date().toISOString().split('T')[0];
-                const res = await fetch(`${ERGAST_API}/${today}/results.json?limit=1`);
-                const data = await res.json();
-                
-                if(data.MRData.RaceTable.Races.length > 0) {
-                    // Hay carrera hoy - forzar modo live
-                    if(currentMode === 'auto') {
-                        currentMode = 'live';
-                        document.getElementById('mode-select').value = 'live';
-                        connectToLiveTiming();
-                    }
-                }
-            } catch(e) {
-                console.log('No hay sesión en vivo detectada');
-            }
-        }
-
-        // Inicializar
+        // Inicializar al cargar la página
         window.addEventListener('load', () => {
+            console.log('Página cargada, iniciando...');
             loadRaces();
-            checkForLiveSession();
-            updateConnection();
         });
     </script>
 </body>
